@@ -10,6 +10,7 @@ const DisplayPage = () => {
   const [countdown, setCountdown] = useState(null);
   const [currentVideoIndex, setCurrentVideoIndex] = useState(0);
   const [isMuted, setIsMuted] = useState(true);
+  const [videoKey, setVideoKey] = useState(0);
   const videoRef = useRef(null);
 
   const fetchDisplayState = useCallback(async () => {
@@ -46,35 +47,55 @@ const DisplayPage = () => {
     }
   }, [displayState?.state, countdown, fetchDisplayState]);
 
-  // Check if single video (use native loop)
-  const isSingleVideo = () => {
-    if (displayState?.state === "berbuka") return true;
-    if (displayState?.state === "tvc" && displayState?.current_tvc_videos?.length === 1) return true;
-    return false;
-  };
-
-  // Handle video end - for multiple videos playlist
-  const handleVideoEnd = useCallback(() => {
-    // Only handle for multiple TVC videos
-    if (displayState?.state === "tvc" && displayState?.current_tvc_videos?.length > 1) {
-      const nextIndex = (currentVideoIndex + 1) % displayState.current_tvc_videos.length;
-      setCurrentVideoIndex(nextIndex);
-    }
-  }, [displayState, currentVideoIndex]);
-
-  // Auto play next video when index changes
+  // Video ended handler - attached directly to video element
   useEffect(() => {
-    if (videoRef.current && displayState?.current_tvc_videos?.length > 1) {
-      const video = videoRef.current;
-      video.load();
-      video.play().catch(() => {
-        // If play fails, ensure muted and try again
-        video.muted = true;
-        setIsMuted(true);
-        video.play().catch(e => console.log("Play failed:", e));
-      });
-    }
-  }, [currentVideoIndex, displayState?.current_tvc_videos?.length]);
+    const video = videoRef.current;
+    if (!video) return;
+
+    const handleEnded = () => {
+      console.log("Video ended event fired");
+      
+      const videos = displayState?.current_tvc_videos || [];
+      
+      if (displayState?.state === "berbuka" || videos.length <= 1) {
+        // Single video or berbuka - restart from beginning
+        video.currentTime = 0;
+        video.play().catch(e => console.log("Replay error:", e));
+      } else {
+        // Multiple videos - go to next
+        setCurrentVideoIndex(prev => {
+          const next = (prev + 1) % videos.length;
+          console.log("Next video index:", next);
+          return next;
+        });
+        setVideoKey(prev => prev + 1); // Force re-render
+      }
+    };
+
+    video.addEventListener('ended', handleEnded);
+    
+    return () => {
+      video.removeEventListener('ended', handleEnded);
+    };
+  }, [displayState]);
+
+  // Load and play video when source changes
+  useEffect(() => {
+    const video = videoRef.current;
+    if (!video) return;
+
+    const videoUrl = getCurrentVideoUrl();
+    if (!videoUrl) return;
+
+    video.src = videoUrl;
+    video.load();
+    video.play().catch(e => {
+      console.log("Autoplay error, trying muted:", e);
+      video.muted = true;
+      setIsMuted(true);
+      video.play().catch(err => console.log("Still failed:", err));
+    });
+  }, [currentVideoIndex, videoKey, displayState?.state]);
 
   // Format countdown time
   const formatCountdown = (seconds) => {
@@ -123,14 +144,10 @@ const DisplayPage = () => {
         {videoUrl ? (
           <video
             ref={videoRef}
-            key={isSingleVideo() ? `single-${videoUrl}` : `multi-${currentVideoIndex}`}
-            src={videoUrl}
             className="w-full h-full object-cover"
             autoPlay
             muted={isMuted}
             playsInline
-            loop={isSingleVideo()}
-            onEnded={!isSingleVideo() ? handleVideoEnd : undefined}
             data-testid="video-player"
           />
         ) : (
