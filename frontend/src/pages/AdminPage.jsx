@@ -334,6 +334,10 @@ const AdminPage = () => {
           </div>
         </div>
         <div className="flex items-center gap-4">
+          {/* User info */}
+          <span className="text-purple-300 text-sm">
+            Logged in as: <span className="text-frestea-green font-semibold">{username}</span>
+          </span>
           {/* Current State Badge */}
           <span 
             className={`px-4 py-2 rounded-full text-sm font-bold uppercase ${
@@ -347,6 +351,10 @@ const AdminPage = () => {
           </span>
           <Button onClick={fetchData} variant="outline" size="icon" data-testid="refresh-btn">
             <RefreshCw className="w-4 h-4" />
+          </Button>
+          <Button onClick={handleLogout} variant="destructive" size="sm" data-testid="logout-btn">
+            <LogOut className="w-4 h-4 mr-2" />
+            Logout
           </Button>
         </div>
       </div>
