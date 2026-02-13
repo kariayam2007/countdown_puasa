@@ -125,8 +125,22 @@ const DisplayPage = () => {
 
       {/* Content Overlay */}
       <div className="relative z-20 flex flex-col items-center justify-center h-full px-4">
-        {/* Status Badge */}
-        <div className="absolute top-8 right-8">
+        {/* Status Badge & Sound Toggle */}
+        <div className="absolute top-8 right-8 flex items-center gap-4">
+          {/* Sound Toggle Button */}
+          {videoUrl && (
+            <button
+              onClick={toggleMute}
+              className="p-3 rounded-full bg-black/50 hover:bg-black/70 transition-colors"
+              data-testid="sound-toggle-btn"
+            >
+              {isMuted ? (
+                <VolumeX className="w-6 h-6 text-white" />
+              ) : (
+                <Volume2 className="w-6 h-6 text-frestea-green" />
+              )}
+            </button>
+          )}
           <span 
             data-testid="status-badge"
             className={`px-4 py-2 rounded-full text-sm font-bold uppercase tracking-wider ${
