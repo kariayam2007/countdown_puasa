@@ -10,7 +10,6 @@ const DisplayPage = () => {
   const [countdown, setCountdown] = useState(null);
   const [currentVideoIndex, setCurrentVideoIndex] = useState(0);
   const [isMuted, setIsMuted] = useState(true);
-  const [videoKey, setVideoKey] = useState(0);
   const videoRef = useRef(null);
 
   const fetchDisplayState = useCallback(async () => {
@@ -47,60 +46,68 @@ const DisplayPage = () => {
     }
   }, [displayState?.state, countdown, fetchDisplayState]);
 
-  // Video ended handler - attached directly to video element
-  useEffect(() => {
-    const video = videoRef.current;
-    if (!video) return;
+  // Get current video URL
+  const getCurrentVideoUrl = useCallback(() => {
+    if (displayState?.state === "berbuka" && displayState?.berbuka_video?.url) {
+      return displayState.berbuka_video.url;
+    }
+    if (displayState?.current_tvc_videos?.length > 0) {
+      return displayState.current_tvc_videos[currentVideoIndex]?.url;
+    }
+    return null;
+  }, [displayState, currentVideoIndex]);
 
-    const handleEnded = () => {
-      console.log("Video ended event fired");
-      
-      const videos = displayState?.current_tvc_videos || [];
-      const state = displayState?.state;
-      
-      if (state === "berbuka") {
-        // Berbuka video - restart from beginning
-        video.currentTime = 0;
-        video.play().catch(e => console.log("Replay error:", e));
-      } else if (videos.length <= 1) {
-        // Single TVC video - restart from beginning
-        video.currentTime = 0;
-        video.play().catch(e => console.log("Replay error:", e));
-      } else {
-        // Multiple TVC videos - go to next
-        setCurrentVideoIndex(prev => {
-          const next = (prev + 1) % videos.length;
-          console.log("Next video index:", next);
-          return next;
-        });
-        setVideoKey(prev => prev + 1);
-      }
-    };
-
-    video.addEventListener('ended', handleEnded);
+  // Handle video ended
+  const handleVideoEnded = useCallback(() => {
+    console.log("Video ended!");
+    const videos = displayState?.current_tvc_videos || [];
     
-    return () => {
-      video.removeEventListener('ended', handleEnded);
-    };
+    if (displayState?.state === "berbuka" || videos.length <= 1) {
+      // Restart single video
+      if (videoRef.current) {
+        videoRef.current.currentTime = 0;
+        videoRef.current.play().catch(e => console.log("Play error:", e));
+      }
+    } else {
+      // Go to next video in playlist
+      setCurrentVideoIndex(prev => (prev + 1) % videos.length);
+    }
   }, [displayState]);
 
-  // Load and play video when source changes
+  // Setup video when URL changes
   useEffect(() => {
     const video = videoRef.current;
-    if (!video) return;
-
-    const videoUrl = getCurrentVideoUrl();
-    if (!videoUrl) return;
-
-    video.src = videoUrl;
-    video.load();
-    video.play().catch(e => {
-      console.log("Autoplay error, trying muted:", e);
-      video.muted = true;
-      setIsMuted(true);
-      video.play().catch(err => console.log("Still failed:", err));
-    });
-  }, [currentVideoIndex, videoKey, displayState?.state]);
+    const url = getCurrentVideoUrl();
+    
+    if (video && url) {
+      console.log("Setting video src:", url);
+      
+      // Remove old listeners
+      video.removeEventListener('ended', handleVideoEnded);
+      
+      // Set new source
+      video.src = url;
+      video.muted = isMuted;
+      video.load();
+      
+      // Add ended listener
+      video.addEventListener('ended', handleVideoEnded);
+      
+      // Play video
+      video.play().catch(e => {
+        console.log("Autoplay blocked, trying muted");
+        video.muted = true;
+        setIsMuted(true);
+        video.play().catch(err => console.log("Play failed:", err));
+      });
+    }
+    
+    return () => {
+      if (video) {
+        video.removeEventListener('ended', handleVideoEnded);
+      }
+    };
+  }, [getCurrentVideoUrl, handleVideoEnded, isMuted, currentVideoIndex]);
 
   // Format countdown time
   const formatCountdown = (seconds) => {
@@ -120,22 +127,10 @@ const DisplayPage = () => {
   // Handle mute toggle
   const toggleMute = () => {
     if (videoRef.current) {
-      const newMutedState = !isMuted;
-      videoRef.current.muted = newMutedState;
-      setIsMuted(newMutedState);
+      const newMuted = !isMuted;
+      videoRef.current.muted = newMuted;
+      setIsMuted(newMuted);
     }
-  };
-
-  // Get current video URL - play TVC in background during countdown too
-  const getCurrentVideoUrl = () => {
-    if (displayState?.state === "berbuka" && displayState?.berbuka_video?.url) {
-      return displayState.berbuka_video.url;
-    }
-    // Play TVC videos during both "tvc" and "countdown" states
-    if (displayState?.current_tvc_videos?.length > 0) {
-      return displayState.current_tvc_videos[currentVideoIndex]?.url;
-    }
-    return null;
   };
 
   const videoUrl = getCurrentVideoUrl();
@@ -145,14 +140,12 @@ const DisplayPage = () => {
       data-testid="display-page"
       className="relative w-screen h-screen overflow-hidden bg-frestea-dark"
     >
-      {/* Background Image/Video */}
+      {/* Background Video */}
       <div className="absolute inset-0 z-0">
         {videoUrl ? (
           <video
             ref={videoRef}
             className="w-full h-full object-cover"
-            autoPlay
-            muted={isMuted}
             playsInline
             data-testid="video-player"
           />
@@ -165,15 +158,13 @@ const DisplayPage = () => {
             data-testid="background-image"
           />
         )}
-        {/* Overlay */}
         <div className="absolute inset-0 video-overlay" />
       </div>
 
-      {/* Content Overlay */}
+      {/* Content */}
       <div className="relative z-20 flex flex-col items-center justify-center h-full px-4">
-        {/* Status Badge & Sound Toggle */}
+        {/* Sound Toggle & Status */}
         <div className="absolute top-8 right-8 flex items-center gap-4">
-          {/* Sound Toggle Button */}
           {videoUrl && (
             <button
               onClick={toggleMute}
@@ -215,34 +206,21 @@ const DisplayPage = () => {
 
             <div className="flex items-center justify-center gap-4 md:gap-8">
               <div className="flex flex-col items-center">
-                <span 
-                  className="font-mono text-7xl md:text-9xl lg:text-[12rem] text-frestea-gold countdown-glow animate-pulse-slow"
-                  data-testid="countdown-hours"
-                >
+                <span className="font-mono text-7xl md:text-9xl lg:text-[12rem] text-frestea-gold countdown-glow animate-pulse-slow" data-testid="countdown-hours">
                   {time.hours}
                 </span>
                 <span className="text-purple-300 text-sm md:text-base uppercase tracking-widest mt-2">Jam</span>
               </div>
-
               <span className="font-mono text-5xl md:text-7xl lg:text-9xl text-frestea-gold">:</span>
-
               <div className="flex flex-col items-center">
-                <span 
-                  className="font-mono text-7xl md:text-9xl lg:text-[12rem] text-frestea-gold countdown-glow animate-pulse-slow"
-                  data-testid="countdown-minutes"
-                >
+                <span className="font-mono text-7xl md:text-9xl lg:text-[12rem] text-frestea-gold countdown-glow animate-pulse-slow" data-testid="countdown-minutes">
                   {time.minutes}
                 </span>
                 <span className="text-purple-300 text-sm md:text-base uppercase tracking-widest mt-2">Menit</span>
               </div>
-
               <span className="font-mono text-5xl md:text-7xl lg:text-9xl text-frestea-gold">:</span>
-
               <div className="flex flex-col items-center">
-                <span 
-                  className="font-mono text-7xl md:text-9xl lg:text-[12rem] text-frestea-gold countdown-glow animate-pulse-slow"
-                  data-testid="countdown-seconds"
-                >
+                <span className="font-mono text-7xl md:text-9xl lg:text-[12rem] text-frestea-gold countdown-glow animate-pulse-slow" data-testid="countdown-seconds">
                   {time.secs}
                 </span>
                 <span className="text-purple-300 text-sm md:text-base uppercase tracking-widest mt-2">Detik</span>
@@ -271,15 +249,11 @@ const DisplayPage = () => {
           </div>
         )}
 
-        {/* TVC Mode - Show brand */}
+        {/* TVC Mode */}
         {displayState?.state === "tvc" && (
           <div className="animate-fade-in text-center" data-testid="tvc-display">
-            <h1 className="font-heading text-5xl md:text-7xl text-white">
-              Frestea
-            </h1>
-            <p className="text-xl md:text-2xl text-frestea-green mt-4">
-              Berasa Refresh Beneran
-            </p>
+            <h1 className="font-heading text-5xl md:text-7xl text-white">Frestea</h1>
+            <p className="text-xl md:text-2xl text-frestea-green mt-4">Berasa Refresh Beneran</p>
             {displayState?.maghrib_time && (
               <p className="text-purple-300 text-base mt-8">
                 Waktu Maghrib Hari Ini: <span className="text-frestea-gold font-bold">{displayState.maghrib_time}</span> WIB
@@ -288,22 +262,14 @@ const DisplayPage = () => {
           </div>
         )}
 
-        {/* No Schedule Message */}
         {!displayState?.maghrib_time && displayState?.state === "tvc" && (
           <div className="absolute bottom-8 left-1/2 transform -translate-x-1/2">
-            <p className="text-purple-400 text-sm">
-              Belum ada jadwal maghrib untuk hari ini
-            </p>
+            <p className="text-purple-400 text-sm">Belum ada jadwal maghrib untuk hari ini</p>
           </div>
         )}
       </div>
 
-      {/* Admin Link */}
-      <a 
-        href="/login" 
-        className="absolute bottom-4 right-4 text-purple-500 hover:text-purple-300 text-sm transition-colors z-30"
-        data-testid="admin-link"
-      >
+      <a href="/login" className="absolute bottom-4 right-4 text-purple-500 hover:text-purple-300 text-sm transition-colors z-30" data-testid="admin-link">
         Admin Panel →
       </a>
     </div>
