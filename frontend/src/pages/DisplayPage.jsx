@@ -46,45 +46,32 @@ const DisplayPage = () => {
     }
   }, [displayState?.state, countdown, fetchDisplayState]);
 
-  // Handle video end - ALWAYS loop manually
+  // Check if single video (use native loop)
+  const isSingleVideo = () => {
+    if (displayState?.state === "berbuka") return true;
+    if (displayState?.state === "tvc" && displayState?.current_tvc_videos?.length === 1) return true;
+    return false;
+  };
+
+  // Handle video end - for multiple videos playlist
   const handleVideoEnd = useCallback(() => {
-    console.log("Video ended, handling loop...");
-    
-    if (displayState?.state === "berbuka") {
-      // Berbuka video - just restart
-      if (videoRef.current) {
-        videoRef.current.currentTime = 0;
-        videoRef.current.play().catch(e => console.log("Play error:", e));
-      }
-    } else if (displayState?.state === "tvc") {
-      const videos = displayState?.current_tvc_videos || [];
-      if (videos.length === 0) return;
-      
-      if (videos.length === 1) {
-        // Single video - restart it
-        if (videoRef.current) {
-          videoRef.current.currentTime = 0;
-          videoRef.current.play().catch(e => console.log("Play error:", e));
-        }
-      } else {
-        // Multiple videos - go to next
-        const nextIndex = (currentVideoIndex + 1) % videos.length;
-        console.log("Moving to next video:", nextIndex);
-        setCurrentVideoIndex(nextIndex);
-      }
+    // Only handle for multiple TVC videos
+    if (displayState?.state === "tvc" && displayState?.current_tvc_videos?.length > 1) {
+      const nextIndex = (currentVideoIndex + 1) % displayState.current_tvc_videos.length;
+      setCurrentVideoIndex(nextIndex);
     }
   }, [displayState, currentVideoIndex]);
 
-  // Play video when index changes (for multiple videos)
+  // Auto play next video when index changes
   useEffect(() => {
     if (videoRef.current && displayState?.current_tvc_videos?.length > 1) {
-      console.log("Video index changed to:", currentVideoIndex);
-      videoRef.current.load();
-      videoRef.current.play().catch(e => {
-        console.log("Autoplay blocked, trying muted:", e);
-        videoRef.current.muted = true;
+      const video = videoRef.current;
+      video.load();
+      video.play().catch(() => {
+        // If play fails, ensure muted and try again
+        video.muted = true;
         setIsMuted(true);
-        videoRef.current.play().catch(err => console.log("Still failed:", err));
+        video.play().catch(e => console.log("Play failed:", e));
       });
     }
   }, [currentVideoIndex, displayState?.current_tvc_videos?.length]);
@@ -104,17 +91,12 @@ const DisplayPage = () => {
 
   const time = formatCountdown(countdown);
 
-  // Handle unmute
+  // Handle mute toggle
   const toggleMute = () => {
     if (videoRef.current) {
       const newMutedState = !isMuted;
       videoRef.current.muted = newMutedState;
       setIsMuted(newMutedState);
-      
-      // If unmuting and video paused, try to play
-      if (!newMutedState && videoRef.current.paused) {
-        videoRef.current.play().catch(e => console.log("Play on unmute failed:", e));
-      }
     }
   };
 
@@ -141,14 +123,14 @@ const DisplayPage = () => {
         {videoUrl ? (
           <video
             ref={videoRef}
-            key={`video-${currentVideoIndex}`}
+            key={isSingleVideo() ? `single-${videoUrl}` : `multi-${currentVideoIndex}`}
             src={videoUrl}
             className="w-full h-full object-cover"
             autoPlay
             muted={isMuted}
             playsInline
-            onEnded={handleVideoEnd}
-            onError={(e) => console.log("Video error:", e.target.error)}
+            loop={isSingleVideo()}
+            onEnded={!isSingleVideo() ? handleVideoEnd : undefined}
             data-testid="video-player"
           />
         ) : (
@@ -199,7 +181,6 @@ const DisplayPage = () => {
         {/* Countdown Display */}
         {displayState?.state === "countdown" && (
           <div className="animate-fade-in text-center" data-testid="countdown-display">
-            {/* Header */}
             <div className="mb-8">
               <h2 className="font-heading text-4xl md:text-6xl text-frestea-gold tracking-wide">
                 Menuju Waktu Berbuka
@@ -209,9 +190,7 @@ const DisplayPage = () => {
               </p>
             </div>
 
-            {/* Countdown Timer */}
             <div className="flex items-center justify-center gap-4 md:gap-8">
-              {/* Hours */}
               <div className="flex flex-col items-center">
                 <span 
                   className="font-mono text-7xl md:text-9xl lg:text-[12rem] text-frestea-gold countdown-glow animate-pulse-slow"
@@ -224,7 +203,6 @@ const DisplayPage = () => {
 
               <span className="font-mono text-5xl md:text-7xl lg:text-9xl text-frestea-gold">:</span>
 
-              {/* Minutes */}
               <div className="flex flex-col items-center">
                 <span 
                   className="font-mono text-7xl md:text-9xl lg:text-[12rem] text-frestea-gold countdown-glow animate-pulse-slow"
@@ -237,7 +215,6 @@ const DisplayPage = () => {
 
               <span className="font-mono text-5xl md:text-7xl lg:text-9xl text-frestea-gold">:</span>
 
-              {/* Seconds */}
               <div className="flex flex-col items-center">
                 <span 
                   className="font-mono text-7xl md:text-9xl lg:text-[12rem] text-frestea-gold countdown-glow animate-pulse-slow"
@@ -249,7 +226,6 @@ const DisplayPage = () => {
               </div>
             </div>
 
-            {/* Maghrib Time Info */}
             {displayState?.maghrib_time && (
               <div className="mt-12">
                 <p className="text-purple-300 text-lg">
