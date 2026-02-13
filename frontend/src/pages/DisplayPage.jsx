@@ -260,7 +260,7 @@ const DisplayPage = () => {
 
       {/* Admin Link */}
       <a 
-        href="/admin" 
+        href="/login" 
         className="absolute bottom-4 right-4 text-purple-500 hover:text-purple-300 text-sm transition-colors z-30"
         data-testid="admin-link"
       >
