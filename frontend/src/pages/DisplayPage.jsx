@@ -9,8 +9,9 @@ const DisplayPage = () => {
   const [displayState, setDisplayState] = useState(null);
   const [countdown, setCountdown] = useState(null);
   const [currentVideoIndex, setCurrentVideoIndex] = useState(0);
-  const [isMuted, setIsMuted] = useState(true);
+  const [isMuted, setIsMuted] = useState(false);
   const videoRef = useRef(null);
+  const userInteracted = useRef(false);
 
   const fetchDisplayState = useCallback(async () => {
     try {
@@ -26,9 +27,24 @@ const DisplayPage = () => {
 
   useEffect(() => {
     fetchDisplayState();
-    const interval = setInterval(fetchDisplayState, 30000); // Refresh every 30 seconds
+    const interval = setInterval(fetchDisplayState, 30000);
     return () => clearInterval(interval);
   }, [fetchDisplayState]);
+
+  // Track user interaction for autoplay with sound
+  useEffect(() => {
+    const handleInteraction = () => {
+      userInteracted.current = true;
+    };
+    
+    document.addEventListener('click', handleInteraction);
+    document.addEventListener('keydown', handleInteraction);
+    
+    return () => {
+      document.removeEventListener('click', handleInteraction);
+      document.removeEventListener('keydown', handleInteraction);
+    };
+  }, []);
 
   // Countdown timer
   useEffect(() => {
@@ -36,7 +52,7 @@ const DisplayPage = () => {
       const timer = setInterval(() => {
         setCountdown((prev) => {
           if (prev <= 1) {
-            fetchDisplayState(); // Refresh state when countdown ends
+            fetchDisplayState();
             return 0;
           }
           return prev - 1;
@@ -48,16 +64,43 @@ const DisplayPage = () => {
 
   // Handle video end for TVC looping
   const handleVideoEnd = () => {
-    if (displayState?.state === "tvc" && displayState?.current_tvc_videos?.length > 0) {
+    if (displayState?.state === "tvc" && displayState?.current_tvc_videos?.length > 1) {
       const nextIndex = (currentVideoIndex + 1) % displayState.current_tvc_videos.length;
       setCurrentVideoIndex(nextIndex);
-      // Force video to play
+    } else if (displayState?.state === "tvc" && displayState?.current_tvc_videos?.length === 1) {
+      // Single video - restart it
       if (videoRef.current) {
-        videoRef.current.load();
-        videoRef.current.play();
+        videoRef.current.currentTime = 0;
+        playVideo();
       }
     }
   };
+
+  // Play video with error handling
+  const playVideo = useCallback(() => {
+    if (videoRef.current) {
+      const playPromise = videoRef.current.play();
+      if (playPromise !== undefined) {
+        playPromise.catch((error) => {
+          console.log("Autoplay prevented:", error);
+          // If autoplay fails, try muted
+          if (!isMuted) {
+            videoRef.current.muted = true;
+            setIsMuted(true);
+            videoRef.current.play().catch(e => console.log("Still failed:", e));
+          }
+        });
+      }
+    }
+  }, [isMuted]);
+
+  // Play video when source changes
+  useEffect(() => {
+    if (videoRef.current && displayState?.current_tvc_videos?.length > 0) {
+      videoRef.current.muted = isMuted;
+      playVideo();
+    }
+  }, [currentVideoIndex, playVideo, displayState?.current_tvc_videos?.length, isMuted]);
 
   // Auto-loop single TVC video
   const shouldLoop = () => {
