@@ -1,4 +1,5 @@
 import { useState, useEffect, useCallback } from "react";
+import { useNavigate } from "react-router-dom";
 import axios from "axios";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
@@ -35,7 +36,8 @@ import {
   Clock, 
   Play,
   ArrowLeft,
-  RefreshCw
+  RefreshCw,
+  LogOut
 } from "lucide-react";
 import { format } from "date-fns";
 
@@ -43,11 +45,51 @@ const BACKEND_URL = process.env.REACT_APP_BACKEND_URL;
 const API = `${BACKEND_URL}/api`;
 
 const AdminPage = () => {
+  const navigate = useNavigate();
   const [tvcVideos, setTvcVideos] = useState([]);
   const [berbukaVideos, setBerbukaVideos] = useState([]);
   const [schedules, setSchedules] = useState([]);
   const [displayState, setDisplayState] = useState(null);
   const [loading, setLoading] = useState(true);
+  const [username, setUsername] = useState("");
+
+  // Get auth header
+  const getAuthHeader = () => {
+    const token = localStorage.getItem("admin_token");
+    return { Authorization: `Bearer ${token}` };
+  };
+
+  // Check auth on mount
+  useEffect(() => {
+    const checkAuth = async () => {
+      const token = localStorage.getItem("admin_token");
+      if (!token) {
+        navigate("/login");
+        return;
+      }
+      
+      try {
+        const response = await axios.get(`${API}/auth/verify`, {
+          headers: getAuthHeader()
+        });
+        setUsername(response.data.username);
+      } catch (error) {
+        localStorage.removeItem("admin_token");
+        localStorage.removeItem("admin_username");
+        navigate("/login");
+      }
+    };
+    
+    checkAuth();
+  }, [navigate]);
+
+  // Logout handler
+  const handleLogout = () => {
+    localStorage.removeItem("admin_token");
+    localStorage.removeItem("admin_username");
+    toast.success("Logout berhasil");
+    navigate("/login");
+  };
 
   // Form states
   const [newTvc, setNewTvc] = useState({ name: "", url: "", order: 0 });
