@@ -9,7 +9,7 @@ const DisplayPage = () => {
   const [displayState, setDisplayState] = useState(null);
   const [countdown, setCountdown] = useState(null);
   const [currentVideoIndex, setCurrentVideoIndex] = useState(0);
-  const [isMuted, setIsMuted] = useState(false);
+  const [isMuted, setIsMuted] = useState(true);
   const videoRef = useRef(null);
 
   const fetchDisplayState = useCallback(async () => {
