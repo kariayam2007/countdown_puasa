@@ -112,14 +112,14 @@ const DisplayPage = () => {
         {videoUrl ? (
           <video
             ref={videoRef}
-            key={videoUrl}
+            key={`${videoUrl}-${currentVideoIndex}`}
             src={videoUrl}
             className="w-full h-full object-cover"
             autoPlay
             muted={isMuted}
             playsInline
             onEnded={handleVideoEnd}
-            loop={displayState?.state === "berbuka"}
+            loop={shouldLoop()}
             data-testid="video-player"
           />
         ) : (
