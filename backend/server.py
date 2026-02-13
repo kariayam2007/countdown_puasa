@@ -259,7 +259,7 @@ async def delete_berbuka_video(video_id: str, username: str = Depends(verify_tok
         raise HTTPException(status_code=404, detail="Video not found")
     return {"message": "Video deleted"}
 
-# ============ MAGHRIB SCHEDULE ENDPOINTS ============
+# ============ MAGHRIB SCHEDULE ENDPOINTS (PROTECTED) ============
 
 @api_router.get("/schedules", response_model=List[MaghribSchedule])
 async def get_schedules():
@@ -267,7 +267,7 @@ async def get_schedules():
     return schedules
 
 @api_router.post("/schedules", response_model=MaghribSchedule)
-async def create_schedule(schedule: MaghribScheduleCreate):
+async def create_schedule(schedule: MaghribScheduleCreate, username: str = Depends(verify_token)):
     # Check if schedule for this date already exists
     existing = await db.maghrib_schedules.find_one({"date": schedule.date})
     if existing:
@@ -279,7 +279,7 @@ async def create_schedule(schedule: MaghribScheduleCreate):
     return schedule_obj
 
 @api_router.put("/schedules/{schedule_id}", response_model=MaghribSchedule)
-async def update_schedule(schedule_id: str, schedule: MaghribScheduleUpdate):
+async def update_schedule(schedule_id: str, schedule: MaghribScheduleUpdate, username: str = Depends(verify_token)):
     update_data = {k: v for k, v in schedule.model_dump().items() if v is not None}
     if not update_data:
         raise HTTPException(status_code=400, detail="No data to update")
@@ -292,14 +292,14 @@ async def update_schedule(schedule_id: str, schedule: MaghribScheduleUpdate):
     return MaghribSchedule(**updated)
 
 @api_router.delete("/schedules/{schedule_id}")
-async def delete_schedule(schedule_id: str):
+async def delete_schedule(schedule_id: str, username: str = Depends(verify_token)):
     result = await db.maghrib_schedules.delete_one({"id": schedule_id})
     if result.deleted_count == 0:
         raise HTTPException(status_code=404, detail="Schedule not found")
     return {"message": "Schedule deleted"}
 
 @api_router.post("/schedules/bulk", response_model=List[MaghribSchedule])
-async def create_bulk_schedules(schedules: List[MaghribScheduleCreate]):
+async def create_bulk_schedules(schedules: List[MaghribScheduleCreate], username: str = Depends(verify_token)):
     created = []
     for schedule in schedules:
         existing = await db.maghrib_schedules.find_one({"date": schedule.date})
