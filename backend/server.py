@@ -225,7 +225,7 @@ async def delete_tvc_video(video_id: str, username: str = Depends(verify_token))
         raise HTTPException(status_code=404, detail="Video not found")
     return {"message": "Video deleted"}
 
-# ============ BERBUKA VIDEO ENDPOINTS ============
+# ============ BERBUKA VIDEO ENDPOINTS (PROTECTED) ============
 
 @api_router.get("/berbuka-videos", response_model=List[BerbukaVideo])
 async def get_berbuka_videos():
@@ -233,14 +233,14 @@ async def get_berbuka_videos():
     return videos
 
 @api_router.post("/berbuka-videos", response_model=BerbukaVideo)
-async def create_berbuka_video(video: BerbukaVideoCreate):
+async def create_berbuka_video(video: BerbukaVideoCreate, username: str = Depends(verify_token)):
     video_obj = BerbukaVideo(**video.model_dump())
     doc = video_obj.model_dump()
     await db.berbuka_videos.insert_one(doc)
     return video_obj
 
 @api_router.put("/berbuka-videos/{video_id}", response_model=BerbukaVideo)
-async def update_berbuka_video(video_id: str, video: BerbukaVideoUpdate):
+async def update_berbuka_video(video_id: str, video: BerbukaVideoUpdate, username: str = Depends(verify_token)):
     update_data = {k: v for k, v in video.model_dump().items() if v is not None}
     if not update_data:
         raise HTTPException(status_code=400, detail="No data to update")
@@ -253,7 +253,7 @@ async def update_berbuka_video(video_id: str, video: BerbukaVideoUpdate):
     return BerbukaVideo(**updated)
 
 @api_router.delete("/berbuka-videos/{video_id}")
-async def delete_berbuka_video(video_id: str):
+async def delete_berbuka_video(video_id: str, username: str = Depends(verify_token)):
     result = await db.berbuka_videos.delete_one({"id": video_id})
     if result.deleted_count == 0:
         raise HTTPException(status_code=404, detail="Video not found")
