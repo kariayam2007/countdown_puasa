@@ -127,8 +127,14 @@ const DisplayPage = () => {
   // Handle unmute
   const toggleMute = () => {
     if (videoRef.current) {
-      videoRef.current.muted = !isMuted;
-      setIsMuted(!isMuted);
+      const newMutedState = !isMuted;
+      videoRef.current.muted = newMutedState;
+      setIsMuted(newMutedState);
+      
+      // If unmuting, try to play
+      if (!newMutedState) {
+        playVideo();
+      }
     }
   };
 
