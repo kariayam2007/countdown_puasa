@@ -104,7 +104,7 @@ const DisplayPage = () => {
             src={videoUrl}
             className="w-full h-full object-cover"
             autoPlay
-            muted
+            muted={isMuted}
             playsInline
             onEnded={handleVideoEnd}
             loop={displayState?.state === "berbuka"}
