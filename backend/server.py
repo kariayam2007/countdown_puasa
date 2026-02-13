@@ -124,6 +124,73 @@ class DisplayState(BaseModel):
     berbuka_video: Optional[BerbukaVideo] = None
     berbuka_end_time: Optional[str] = None
 
+# ============ AUTH HELPERS ============
+
+def hash_password(password: str) -> str:
+    return bcrypt.hashpw(password.encode('utf-8'), bcrypt.gensalt()).decode('utf-8')
+
+def verify_password(password: str, password_hash: str) -> bool:
+    return bcrypt.checkpw(password.encode('utf-8'), password_hash.encode('utf-8'))
+
+def create_token(username: str) -> str:
+    payload = {
+        "username": username,
+        "exp": datetime.now(timezone.utc) + timedelta(hours=JWT_EXPIRATION_HOURS)
+    }
+    return jwt.encode(payload, JWT_SECRET, algorithm=JWT_ALGORITHM)
+
+def verify_token(credentials: HTTPAuthorizationCredentials = Depends(security)) -> str:
+    try:
+        token = credentials.credentials
+        payload = jwt.decode(token, JWT_SECRET, algorithms=[JWT_ALGORITHM])
+        return payload["username"]
+    except jwt.ExpiredSignatureError:
+        raise HTTPException(status_code=401, detail="Token expired")
+    except jwt.InvalidTokenError:
+        raise HTTPException(status_code=401, detail="Invalid token")
+
+# ============ AUTH ENDPOINTS ============
+
+@api_router.post("/auth/login", response_model=LoginResponse)
+async def login(request: LoginRequest):
+    # Find user
+    user = await db.admin_users.find_one({"username": request.username}, {"_id": 0})
+    
+    if not user:
+        raise HTTPException(status_code=401, detail="Username atau password salah")
+    
+    if not verify_password(request.password, user["password_hash"]):
+        raise HTTPException(status_code=401, detail="Username atau password salah")
+    
+    token = create_token(request.username)
+    return LoginResponse(token=token, username=request.username)
+
+@api_router.get("/auth/verify")
+async def verify_auth(username: str = Depends(verify_token)):
+    return {"valid": True, "username": username}
+
+@api_router.post("/auth/setup")
+async def setup_admin(request: LoginRequest):
+    """Setup initial admin user - only works if no admin exists"""
+    existing = await db.admin_users.find_one({})
+    if existing:
+        raise HTTPException(status_code=400, detail="Admin sudah ada. Gunakan login.")
+    
+    admin = AdminUser(
+        username=request.username,
+        password_hash=hash_password(request.password)
+    )
+    await db.admin_users.insert_one(admin.model_dump())
+    
+    token = create_token(request.username)
+    return LoginResponse(token=token, username=request.username)
+
+@api_router.get("/auth/check-setup")
+async def check_setup():
+    """Check if admin user has been setup"""
+    existing = await db.admin_users.find_one({})
+    return {"needs_setup": existing is None}
+
 # ============ TVC VIDEO ENDPOINTS ============
 
 @api_router.get("/tvc-videos", response_model=List[TVCVideo])
