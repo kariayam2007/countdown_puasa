@@ -121,11 +121,12 @@ const DisplayPage = () => {
     }
   };
 
-  // Get current video URL
+  // Get current video URL - play TVC in background during countdown too
   const getCurrentVideoUrl = () => {
     if (displayState?.state === "berbuka" && displayState?.berbuka_video?.url) {
       return displayState.berbuka_video.url;
     }
+    // Play TVC videos during both "tvc" and "countdown" states
     if (displayState?.current_tvc_videos?.length > 0) {
       return displayState.current_tvc_videos[currentVideoIndex]?.url;
     }
