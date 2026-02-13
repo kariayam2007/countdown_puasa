@@ -48,10 +48,22 @@ const DisplayPage = () => {
 
   // Handle video end for TVC looping
   const handleVideoEnd = () => {
-    if (displayState?.current_tvc_videos?.length > 0) {
+    if (displayState?.state === "tvc" && displayState?.current_tvc_videos?.length > 0) {
       const nextIndex = (currentVideoIndex + 1) % displayState.current_tvc_videos.length;
       setCurrentVideoIndex(nextIndex);
+      // Force video to play
+      if (videoRef.current) {
+        videoRef.current.load();
+        videoRef.current.play();
+      }
     }
+  };
+
+  // Auto-loop single TVC video
+  const shouldLoop = () => {
+    if (displayState?.state === "berbuka") return true;
+    if (displayState?.state === "tvc" && displayState?.current_tvc_videos?.length === 1) return true;
+    return false;
   };
 
   // Format countdown time
