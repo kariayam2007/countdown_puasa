@@ -102,6 +102,14 @@ const AdminPage = () => {
   const [editingTvc, setEditingTvc] = useState(null);
   const [editingBerbuka, setEditingBerbuka] = useState(null);
   const [editingSchedule, setEditingSchedule] = useState(null);
+  
+  // User management states
+  const [users, setUsers] = useState([]);
+  const [newUser, setNewUser] = useState({ username: "", password: "" });
+  const [changePassword, setChangePassword] = useState({ current_password: "", new_password: "", confirm_password: "" });
+  const [resetPassword, setResetPassword] = useState({ user_id: "", password: "" });
+  const [showChangePassword, setShowChangePassword] = useState(false);
+  const [showResetPassword, setShowResetPassword] = useState(false);
 
   const fetchData = useCallback(async () => {
     setLoading(true);
