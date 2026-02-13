@@ -56,19 +56,24 @@ const DisplayPage = () => {
       console.log("Video ended event fired");
       
       const videos = displayState?.current_tvc_videos || [];
+      const state = displayState?.state;
       
-      if (displayState?.state === "berbuka" || videos.length <= 1) {
-        // Single video or berbuka - restart from beginning
+      if (state === "berbuka") {
+        // Berbuka video - restart from beginning
+        video.currentTime = 0;
+        video.play().catch(e => console.log("Replay error:", e));
+      } else if (videos.length <= 1) {
+        // Single TVC video - restart from beginning
         video.currentTime = 0;
         video.play().catch(e => console.log("Replay error:", e));
       } else {
-        // Multiple videos - go to next
+        // Multiple TVC videos - go to next
         setCurrentVideoIndex(prev => {
           const next = (prev + 1) % videos.length;
           console.log("Next video index:", next);
           return next;
         });
-        setVideoKey(prev => prev + 1); // Force re-render
+        setVideoKey(prev => prev + 1);
       }
     };
 
