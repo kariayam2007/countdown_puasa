@@ -132,43 +132,59 @@ const AdminPage = () => {
       return;
     }
     try {
-      await axios.post(`${API}/tvc-videos`, newTvc);
+      await axios.post(`${API}/tvc-videos`, newTvc, { headers: getAuthHeader() });
       toast.success("Video TVC berhasil ditambahkan");
       setNewTvc({ name: "", url: "", order: 0 });
       fetchData();
     } catch (error) {
-      toast.error("Gagal menambahkan video");
+      if (error.response?.status === 401) {
+        navigate("/login");
+      } else {
+        toast.error("Gagal menambahkan video");
+      }
     }
   };
 
   const handleUpdateTvc = async () => {
     if (!editingTvc) return;
     try {
-      await axios.put(`${API}/tvc-videos/${editingTvc.id}`, editingTvc);
+      await axios.put(`${API}/tvc-videos/${editingTvc.id}`, editingTvc, { headers: getAuthHeader() });
       toast.success("Video TVC berhasil diupdate");
       setEditingTvc(null);
       fetchData();
     } catch (error) {
-      toast.error("Gagal mengupdate video");
+      if (error.response?.status === 401) {
+        navigate("/login");
+      } else {
+        toast.error("Gagal mengupdate video");
+      }
     }
   };
 
   const handleDeleteTvc = async (id) => {
     try {
-      await axios.delete(`${API}/tvc-videos/${id}`);
+      await axios.delete(`${API}/tvc-videos/${id}`, { headers: getAuthHeader() });
       toast.success("Video TVC berhasil dihapus");
       fetchData();
     } catch (error) {
-      toast.error("Gagal menghapus video");
+      if (error.response?.status === 401) {
+        navigate("/login");
+      } else {
+        toast.error("Gagal menghapus video");
+      }
     }
   };
 
   const handleToggleTvc = async (video) => {
     try {
-      await axios.put(`${API}/tvc-videos/${video.id}`, { is_active: !video.is_active });
+      await axios.put(`${API}/tvc-videos/${video.id}`, { is_active: !video.is_active }, { headers: getAuthHeader() });
       fetchData();
     } catch (error) {
-      toast.error("Gagal mengubah status video");
+      if (error.response?.status === 401) {
+        navigate("/login");
+      } else {
+        toast.error("Gagal mengubah status video");
+      }
     }
   };
 
@@ -179,43 +195,59 @@ const AdminPage = () => {
       return;
     }
     try {
-      await axios.post(`${API}/berbuka-videos`, newBerbuka);
+      await axios.post(`${API}/berbuka-videos`, newBerbuka, { headers: getAuthHeader() });
       toast.success("Video Berbuka berhasil ditambahkan");
       setNewBerbuka({ name: "", url: "", duration_seconds: 300 });
       fetchData();
     } catch (error) {
-      toast.error("Gagal menambahkan video");
+      if (error.response?.status === 401) {
+        navigate("/login");
+      } else {
+        toast.error("Gagal menambahkan video");
+      }
     }
   };
 
   const handleUpdateBerbuka = async () => {
     if (!editingBerbuka) return;
     try {
-      await axios.put(`${API}/berbuka-videos/${editingBerbuka.id}`, editingBerbuka);
+      await axios.put(`${API}/berbuka-videos/${editingBerbuka.id}`, editingBerbuka, { headers: getAuthHeader() });
       toast.success("Video Berbuka berhasil diupdate");
       setEditingBerbuka(null);
       fetchData();
     } catch (error) {
-      toast.error("Gagal mengupdate video");
+      if (error.response?.status === 401) {
+        navigate("/login");
+      } else {
+        toast.error("Gagal mengupdate video");
+      }
     }
   };
 
   const handleDeleteBerbuka = async (id) => {
     try {
-      await axios.delete(`${API}/berbuka-videos/${id}`);
+      await axios.delete(`${API}/berbuka-videos/${id}`, { headers: getAuthHeader() });
       toast.success("Video Berbuka berhasil dihapus");
       fetchData();
     } catch (error) {
-      toast.error("Gagal menghapus video");
+      if (error.response?.status === 401) {
+        navigate("/login");
+      } else {
+        toast.error("Gagal menghapus video");
+      }
     }
   };
 
   const handleToggleBerbuka = async (video) => {
     try {
-      await axios.put(`${API}/berbuka-videos/${video.id}`, { is_active: !video.is_active });
+      await axios.put(`${API}/berbuka-videos/${video.id}`, { is_active: !video.is_active }, { headers: getAuthHeader() });
       fetchData();
     } catch (error) {
-      toast.error("Gagal mengubah status video");
+      if (error.response?.status === 401) {
+        navigate("/login");
+      } else {
+        toast.error("Gagal mengubah status video");
+      }
     }
   };
 
@@ -226,13 +258,15 @@ const AdminPage = () => {
       return;
     }
     try {
-      await axios.post(`${API}/schedules`, newSchedule);
+      await axios.post(`${API}/schedules`, newSchedule, { headers: getAuthHeader() });
       toast.success("Jadwal berhasil ditambahkan");
       setNewSchedule({ date: "", maghrib_time: "" });
       setSelectedDate(null);
       fetchData();
     } catch (error) {
-      if (error.response?.data?.detail) {
+      if (error.response?.status === 401) {
+        navigate("/login");
+      } else if (error.response?.data?.detail) {
         toast.error(error.response.data.detail);
       } else {
         toast.error("Gagal menambahkan jadwal");
@@ -243,22 +277,30 @@ const AdminPage = () => {
   const handleUpdateSchedule = async () => {
     if (!editingSchedule) return;
     try {
-      await axios.put(`${API}/schedules/${editingSchedule.id}`, editingSchedule);
+      await axios.put(`${API}/schedules/${editingSchedule.id}`, editingSchedule, { headers: getAuthHeader() });
       toast.success("Jadwal berhasil diupdate");
       setEditingSchedule(null);
       fetchData();
     } catch (error) {
-      toast.error("Gagal mengupdate jadwal");
+      if (error.response?.status === 401) {
+        navigate("/login");
+      } else {
+        toast.error("Gagal mengupdate jadwal");
+      }
     }
   };
 
   const handleDeleteSchedule = async (id) => {
     try {
-      await axios.delete(`${API}/schedules/${id}`);
+      await axios.delete(`${API}/schedules/${id}`, { headers: getAuthHeader() });
       toast.success("Jadwal berhasil dihapus");
       fetchData();
     } catch (error) {
-      toast.error("Gagal menghapus jadwal");
+      if (error.response?.status === 401) {
+        navigate("/login");
+      } else {
+        toast.error("Gagal menghapus jadwal");
+      }
     }
   };
 
