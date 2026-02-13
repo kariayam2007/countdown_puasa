@@ -191,7 +191,7 @@ async def check_setup():
     existing = await db.admin_users.find_one({})
     return {"needs_setup": existing is None}
 
-# ============ TVC VIDEO ENDPOINTS ============
+# ============ TVC VIDEO ENDPOINTS (PROTECTED) ============
 
 @api_router.get("/tvc-videos", response_model=List[TVCVideo])
 async def get_tvc_videos():
@@ -199,14 +199,14 @@ async def get_tvc_videos():
     return videos
 
 @api_router.post("/tvc-videos", response_model=TVCVideo)
-async def create_tvc_video(video: TVCVideoCreate):
+async def create_tvc_video(video: TVCVideoCreate, username: str = Depends(verify_token)):
     video_obj = TVCVideo(**video.model_dump())
     doc = video_obj.model_dump()
     await db.tvc_videos.insert_one(doc)
     return video_obj
 
 @api_router.put("/tvc-videos/{video_id}", response_model=TVCVideo)
-async def update_tvc_video(video_id: str, video: TVCVideoUpdate):
+async def update_tvc_video(video_id: str, video: TVCVideoUpdate, username: str = Depends(verify_token)):
     update_data = {k: v for k, v in video.model_dump().items() if v is not None}
     if not update_data:
         raise HTTPException(status_code=400, detail="No data to update")
@@ -219,7 +219,7 @@ async def update_tvc_video(video_id: str, video: TVCVideoUpdate):
     return TVCVideo(**updated)
 
 @api_router.delete("/tvc-videos/{video_id}")
-async def delete_tvc_video(video_id: str):
+async def delete_tvc_video(video_id: str, username: str = Depends(verify_token)):
     result = await db.tvc_videos.delete_one({"id": video_id})
     if result.deleted_count == 0:
         raise HTTPException(status_code=404, detail="Video not found")
