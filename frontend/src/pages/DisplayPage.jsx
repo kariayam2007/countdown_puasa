@@ -9,9 +9,8 @@ const DisplayPage = () => {
   const [displayState, setDisplayState] = useState(null);
   const [countdown, setCountdown] = useState(null);
   const [currentVideoIndex, setCurrentVideoIndex] = useState(0);
-  const [isMuted, setIsMuted] = useState(false);
+  const [isMuted, setIsMuted] = useState(true);
   const videoRef = useRef(null);
-  const userInteracted = useRef(false);
 
   const fetchDisplayState = useCallback(async () => {
     try {
@@ -31,21 +30,6 @@ const DisplayPage = () => {
     return () => clearInterval(interval);
   }, [fetchDisplayState]);
 
-  // Track user interaction for autoplay with sound
-  useEffect(() => {
-    const handleInteraction = () => {
-      userInteracted.current = true;
-    };
-    
-    document.addEventListener('click', handleInteraction);
-    document.addEventListener('keydown', handleInteraction);
-    
-    return () => {
-      document.removeEventListener('click', handleInteraction);
-      document.removeEventListener('keydown', handleInteraction);
-    };
-  }, []);
-
   // Countdown timer
   useEffect(() => {
     if (displayState?.state === "countdown" && countdown !== null) {
@@ -62,52 +46,48 @@ const DisplayPage = () => {
     }
   }, [displayState?.state, countdown, fetchDisplayState]);
 
-  // Handle video end for TVC looping
-  const handleVideoEnd = () => {
-    if (displayState?.state === "tvc" && displayState?.current_tvc_videos?.length > 1) {
-      const nextIndex = (currentVideoIndex + 1) % displayState.current_tvc_videos.length;
-      setCurrentVideoIndex(nextIndex);
-    } else if (displayState?.state === "tvc" && displayState?.current_tvc_videos?.length === 1) {
-      // Single video - restart it
+  // Handle video end - ALWAYS loop manually
+  const handleVideoEnd = useCallback(() => {
+    console.log("Video ended, handling loop...");
+    
+    if (displayState?.state === "berbuka") {
+      // Berbuka video - just restart
       if (videoRef.current) {
         videoRef.current.currentTime = 0;
-        playVideo();
+        videoRef.current.play().catch(e => console.log("Play error:", e));
+      }
+    } else if (displayState?.state === "tvc") {
+      const videos = displayState?.current_tvc_videos || [];
+      if (videos.length === 0) return;
+      
+      if (videos.length === 1) {
+        // Single video - restart it
+        if (videoRef.current) {
+          videoRef.current.currentTime = 0;
+          videoRef.current.play().catch(e => console.log("Play error:", e));
+        }
+      } else {
+        // Multiple videos - go to next
+        const nextIndex = (currentVideoIndex + 1) % videos.length;
+        console.log("Moving to next video:", nextIndex);
+        setCurrentVideoIndex(nextIndex);
       }
     }
-  };
+  }, [displayState, currentVideoIndex]);
 
-  // Play video with error handling
-  const playVideo = useCallback(() => {
-    if (videoRef.current) {
-      const playPromise = videoRef.current.play();
-      if (playPromise !== undefined) {
-        playPromise.catch((error) => {
-          console.log("Autoplay prevented:", error);
-          // If autoplay fails, try muted
-          if (!isMuted) {
-            videoRef.current.muted = true;
-            setIsMuted(true);
-            videoRef.current.play().catch(e => console.log("Still failed:", e));
-          }
-        });
-      }
-    }
-  }, [isMuted]);
-
-  // Play video when source changes
+  // Play video when index changes (for multiple videos)
   useEffect(() => {
-    if (videoRef.current && displayState?.current_tvc_videos?.length > 0) {
-      videoRef.current.muted = isMuted;
-      playVideo();
+    if (videoRef.current && displayState?.current_tvc_videos?.length > 1) {
+      console.log("Video index changed to:", currentVideoIndex);
+      videoRef.current.load();
+      videoRef.current.play().catch(e => {
+        console.log("Autoplay blocked, trying muted:", e);
+        videoRef.current.muted = true;
+        setIsMuted(true);
+        videoRef.current.play().catch(err => console.log("Still failed:", err));
+      });
     }
-  }, [currentVideoIndex, playVideo, displayState?.current_tvc_videos?.length, isMuted]);
-
-  // Auto-loop single TVC video
-  const shouldLoop = () => {
-    if (displayState?.state === "berbuka") return true;
-    if (displayState?.state === "tvc" && displayState?.current_tvc_videos?.length === 1) return true;
-    return false;
-  };
+  }, [currentVideoIndex, displayState?.current_tvc_videos?.length]);
 
   // Format countdown time
   const formatCountdown = (seconds) => {
@@ -131,9 +111,9 @@ const DisplayPage = () => {
       videoRef.current.muted = newMutedState;
       setIsMuted(newMutedState);
       
-      // If unmuting, try to play
-      if (!newMutedState) {
-        playVideo();
+      // If unmuting and video paused, try to play
+      if (!newMutedState && videoRef.current.paused) {
+        videoRef.current.play().catch(e => console.log("Play on unmute failed:", e));
       }
     }
   };
@@ -161,15 +141,14 @@ const DisplayPage = () => {
         {videoUrl ? (
           <video
             ref={videoRef}
-            key={`${videoUrl}-${currentVideoIndex}`}
+            key={`video-${currentVideoIndex}`}
             src={videoUrl}
             className="w-full h-full object-cover"
             autoPlay
             muted={isMuted}
             playsInline
             onEnded={handleVideoEnd}
-            onError={(e) => console.log("Video error:", e)}
-            loop={shouldLoop()}
+            onError={(e) => console.log("Video error:", e.target.error)}
             data-testid="video-player"
           />
         ) : (
