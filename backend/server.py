@@ -204,6 +204,92 @@ async def check_setup():
     existing = await db.admin_users.find_one({})
     return {"needs_setup": existing is None}
 
+@api_router.post("/auth/change-password")
+async def change_password(request: ChangePasswordRequest, username: str = Depends(verify_token)):
+    """Change password for current user"""
+    user = await db.admin_users.find_one({"username": username}, {"_id": 0})
+    if not user:
+        raise HTTPException(status_code=404, detail="User tidak ditemukan")
+    
+    if not verify_password(request.current_password, user["password_hash"]):
+        raise HTTPException(status_code=401, detail="Password lama salah")
+    
+    if len(request.new_password) < 6:
+        raise HTTPException(status_code=400, detail="Password minimal 6 karakter")
+    
+    new_hash = hash_password(request.new_password)
+    await db.admin_users.update_one(
+        {"username": username},
+        {"$set": {"password_hash": new_hash}}
+    )
+    
+    return {"message": "Password berhasil diubah"}
+
+@api_router.get("/auth/users", response_model=List[UserResponse])
+async def get_users(username: str = Depends(verify_token)):
+    """Get all admin users"""
+    users = await db.admin_users.find({}, {"_id": 0, "password_hash": 0}).to_list(100)
+    return users
+
+@api_router.post("/auth/users", response_model=UserResponse)
+async def create_user(request: CreateUserRequest, username: str = Depends(verify_token)):
+    """Create a new admin user"""
+    existing = await db.admin_users.find_one({"username": request.username})
+    if existing:
+        raise HTTPException(status_code=400, detail="Username sudah digunakan")
+    
+    if len(request.password) < 6:
+        raise HTTPException(status_code=400, detail="Password minimal 6 karakter")
+    
+    admin = AdminUser(
+        username=request.username,
+        password_hash=hash_password(request.password)
+    )
+    await db.admin_users.insert_one(admin.model_dump())
+    
+    return UserResponse(
+        id=admin.id,
+        username=admin.username,
+        created_at=admin.created_at
+    )
+
+@api_router.delete("/auth/users/{user_id}")
+async def delete_user(user_id: str, username: str = Depends(verify_token)):
+    """Delete an admin user"""
+    # Prevent deleting self
+    user_to_delete = await db.admin_users.find_one({"id": user_id}, {"_id": 0})
+    if not user_to_delete:
+        raise HTTPException(status_code=404, detail="User tidak ditemukan")
+    
+    if user_to_delete["username"] == username:
+        raise HTTPException(status_code=400, detail="Tidak bisa menghapus akun sendiri")
+    
+    # Check if this is the last user
+    count = await db.admin_users.count_documents({})
+    if count <= 1:
+        raise HTTPException(status_code=400, detail="Minimal harus ada 1 admin")
+    
+    await db.admin_users.delete_one({"id": user_id})
+    return {"message": "User berhasil dihapus"}
+
+@api_router.put("/auth/users/{user_id}/reset-password")
+async def reset_user_password(user_id: str, request: LoginRequest, username: str = Depends(verify_token)):
+    """Reset password for another user"""
+    user = await db.admin_users.find_one({"id": user_id}, {"_id": 0})
+    if not user:
+        raise HTTPException(status_code=404, detail="User tidak ditemukan")
+    
+    if len(request.password) < 6:
+        raise HTTPException(status_code=400, detail="Password minimal 6 karakter")
+    
+    new_hash = hash_password(request.password)
+    await db.admin_users.update_one(
+        {"id": user_id},
+        {"$set": {"password_hash": new_hash}}
+    )
+    
+    return {"message": "Password berhasil direset"}
+
 # ============ TVC VIDEO ENDPOINTS (PROTECTED) ============
 
 @api_router.get("/tvc-videos", response_model=List[TVCVideo])
