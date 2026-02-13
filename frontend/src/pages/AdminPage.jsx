@@ -329,6 +329,88 @@ const AdminPage = () => {
     }));
   };
 
+  // User management handlers
+  const handleChangePassword = async () => {
+    if (changePassword.new_password !== changePassword.confirm_password) {
+      toast.error("Password baru tidak cocok");
+      return;
+    }
+    if (changePassword.new_password.length < 6) {
+      toast.error("Password minimal 6 karakter");
+      return;
+    }
+    try {
+      await axios.post(`${API}/auth/change-password`, {
+        current_password: changePassword.current_password,
+        new_password: changePassword.new_password
+      }, { headers: getAuthHeader() });
+      toast.success("Password berhasil diubah");
+      setChangePassword({ current_password: "", new_password: "", confirm_password: "" });
+      setShowChangePassword(false);
+    } catch (error) {
+      if (error.response?.status === 401) {
+        toast.error(error.response?.data?.detail || "Password lama salah");
+      } else {
+        toast.error(error.response?.data?.detail || "Gagal mengubah password");
+      }
+    }
+  };
+
+  const handleAddUser = async () => {
+    if (!newUser.username || !newUser.password) {
+      toast.error("Username dan password harus diisi");
+      return;
+    }
+    if (newUser.password.length < 6) {
+      toast.error("Password minimal 6 karakter");
+      return;
+    }
+    try {
+      await axios.post(`${API}/auth/users`, newUser, { headers: getAuthHeader() });
+      toast.success("User berhasil ditambahkan");
+      setNewUser({ username: "", password: "" });
+      fetchData();
+    } catch (error) {
+      if (error.response?.status === 401) {
+        navigate("/login");
+      } else {
+        toast.error(error.response?.data?.detail || "Gagal menambahkan user");
+      }
+    }
+  };
+
+  const handleDeleteUser = async (userId) => {
+    try {
+      await axios.delete(`${API}/auth/users/${userId}`, { headers: getAuthHeader() });
+      toast.success("User berhasil dihapus");
+      fetchData();
+    } catch (error) {
+      if (error.response?.status === 401) {
+        navigate("/login");
+      } else {
+        toast.error(error.response?.data?.detail || "Gagal menghapus user");
+      }
+    }
+  };
+
+  const handleResetPassword = async () => {
+    if (!resetPassword.password || resetPassword.password.length < 6) {
+      toast.error("Password minimal 6 karakter");
+      return;
+    }
+    try {
+      await axios.put(`${API}/auth/users/${resetPassword.user_id}/reset-password`, {
+        username: "",
+        password: resetPassword.password
+      }, { headers: getAuthHeader() });
+      toast.success("Password berhasil direset");
+      setResetPassword({ user_id: "", password: "" });
+      setShowResetPassword(false);
+    } catch (error) {
+      toast.error(error.response?.data?.detail || "Gagal mereset password");
+    }
+  };
+
   if (loading) {
     return (
       <div className="min-h-screen bg-frestea-dark flex items-center justify-center">
