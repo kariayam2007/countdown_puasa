@@ -168,6 +168,7 @@ const DisplayPage = () => {
             muted={isMuted}
             playsInline
             onEnded={handleVideoEnd}
+            onError={(e) => console.log("Video error:", e)}
             loop={shouldLoop()}
             data-testid="video-player"
           />
