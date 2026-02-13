@@ -922,6 +922,202 @@ const AdminPage = () => {
             </CardContent>
           </Card>
         </TabsContent>
+
+        {/* Users Tab */}
+        <TabsContent value="users">
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+            {/* Change Password Card */}
+            <Card className="admin-card">
+              <CardHeader>
+                <CardTitle className="text-white flex items-center gap-2">
+                  <Key className="w-5 h-5 text-blue-400" />
+                  Ubah Password
+                </CardTitle>
+                <CardDescription className="text-purple-300">
+                  Ubah password akun Anda sendiri
+                </CardDescription>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                <div>
+                  <Label className="text-purple-300">Password Lama</Label>
+                  <Input
+                    type="password"
+                    placeholder="••••••••"
+                    value={changePassword.current_password}
+                    onChange={(e) => setChangePassword(prev => ({ ...prev, current_password: e.target.value }))}
+                    className="bg-frestea-dark border-frestea-purple/30"
+                    data-testid="current-password-input"
+                  />
+                </div>
+                <div>
+                  <Label className="text-purple-300">Password Baru</Label>
+                  <Input
+                    type="password"
+                    placeholder="••••••••"
+                    value={changePassword.new_password}
+                    onChange={(e) => setChangePassword(prev => ({ ...prev, new_password: e.target.value }))}
+                    className="bg-frestea-dark border-frestea-purple/30"
+                    data-testid="new-password-input"
+                  />
+                </div>
+                <div>
+                  <Label className="text-purple-300">Konfirmasi Password Baru</Label>
+                  <Input
+                    type="password"
+                    placeholder="••••••••"
+                    value={changePassword.confirm_password}
+                    onChange={(e) => setChangePassword(prev => ({ ...prev, confirm_password: e.target.value }))}
+                    className="bg-frestea-dark border-frestea-purple/30"
+                    data-testid="confirm-new-password-input"
+                  />
+                </div>
+                <Button onClick={handleChangePassword} className="w-full bg-blue-600 hover:bg-blue-700" data-testid="change-password-btn">
+                  <Key className="w-4 h-4 mr-2" />
+                  Ubah Password
+                </Button>
+              </CardContent>
+            </Card>
+
+            {/* Add New User Card */}
+            <Card className="admin-card">
+              <CardHeader>
+                <CardTitle className="text-white flex items-center gap-2">
+                  <UserPlus className="w-5 h-5 text-green-400" />
+                  Tambah User Baru
+                </CardTitle>
+                <CardDescription className="text-purple-300">
+                  Tambahkan admin user baru
+                </CardDescription>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                <div>
+                  <Label className="text-purple-300">Username</Label>
+                  <Input
+                    placeholder="username"
+                    value={newUser.username}
+                    onChange={(e) => setNewUser(prev => ({ ...prev, username: e.target.value }))}
+                    className="bg-frestea-dark border-frestea-purple/30"
+                    data-testid="new-user-username-input"
+                  />
+                </div>
+                <div>
+                  <Label className="text-purple-300">Password</Label>
+                  <Input
+                    type="password"
+                    placeholder="••••••••"
+                    value={newUser.password}
+                    onChange={(e) => setNewUser(prev => ({ ...prev, password: e.target.value }))}
+                    className="bg-frestea-dark border-frestea-purple/30"
+                    data-testid="new-user-password-input"
+                  />
+                </div>
+                <Button onClick={handleAddUser} className="w-full bg-frestea-green text-black hover:bg-frestea-green/80" data-testid="add-user-btn">
+                  <UserPlus className="w-4 h-4 mr-2" />
+                  Tambah User
+                </Button>
+              </CardContent>
+            </Card>
+          </div>
+
+          {/* Users List */}
+          <Card className="admin-card mt-6">
+            <CardHeader>
+              <CardTitle className="text-white flex items-center gap-2">
+                <Users className="w-5 h-5 text-purple-400" />
+                Daftar User
+              </CardTitle>
+              <CardDescription className="text-purple-300">
+                Kelola semua admin user
+              </CardDescription>
+            </CardHeader>
+            <CardContent>
+              <Table>
+                <TableHeader>
+                  <TableRow className="border-frestea-purple/30">
+                    <TableHead className="text-purple-300">Username</TableHead>
+                    <TableHead className="text-purple-300">Dibuat</TableHead>
+                    <TableHead className="text-purple-300 text-right">Aksi</TableHead>
+                  </TableRow>
+                </TableHeader>
+                <TableBody>
+                  {users.map((user) => (
+                    <TableRow key={user.id} className="border-frestea-purple/30">
+                      <TableCell className="text-white font-medium">
+                        {user.username}
+                        {user.username === username && (
+                          <span className="ml-2 text-xs bg-frestea-green/20 text-frestea-green px-2 py-1 rounded">
+                            Anda
+                          </span>
+                        )}
+                      </TableCell>
+                      <TableCell className="text-purple-300">
+                        {new Date(user.created_at).toLocaleDateString('id-ID')}
+                      </TableCell>
+                      <TableCell className="text-right space-x-2">
+                        {user.username !== username && (
+                          <>
+                            <Dialog>
+                              <DialogTrigger asChild>
+                                <Button 
+                                  variant="ghost" 
+                                  size="icon"
+                                  onClick={() => setResetPassword({ user_id: user.id, password: "" })}
+                                  data-testid={`reset-password-${user.id}`}
+                                >
+                                  <Key className="w-4 h-4 text-blue-400" />
+                                </Button>
+                              </DialogTrigger>
+                              <DialogContent className="bg-frestea-surface border-frestea-purple/30">
+                                <DialogHeader>
+                                  <DialogTitle className="text-white">Reset Password - {user.username}</DialogTitle>
+                                </DialogHeader>
+                                <div className="space-y-4">
+                                  <div>
+                                    <Label className="text-purple-300">Password Baru</Label>
+                                    <Input
+                                      type="password"
+                                      placeholder="••••••••"
+                                      value={resetPassword.password}
+                                      onChange={(e) => setResetPassword(prev => ({ ...prev, password: e.target.value }))}
+                                      className="bg-frestea-dark border-frestea-purple/30"
+                                    />
+                                  </div>
+                                </div>
+                                <DialogFooter>
+                                  <DialogClose asChild>
+                                    <Button variant="ghost">Batal</Button>
+                                  </DialogClose>
+                                  <DialogClose asChild>
+                                    <Button onClick={handleResetPassword} className="bg-blue-600">Reset Password</Button>
+                                  </DialogClose>
+                                </DialogFooter>
+                              </DialogContent>
+                            </Dialog>
+                            <Button 
+                              variant="ghost" 
+                              size="icon"
+                              onClick={() => handleDeleteUser(user.id)}
+                              data-testid={`delete-user-${user.id}`}
+                            >
+                              <Trash2 className="w-4 h-4 text-red-400" />
+                            </Button>
+                          </>
+                        )}
+                      </TableCell>
+                    </TableRow>
+                  ))}
+                  {users.length === 0 && (
+                    <TableRow>
+                      <TableCell colSpan={3} className="text-center text-purple-400 py-8">
+                        Belum ada user
+                      </TableCell>
+                    </TableRow>
+                  )}
+                </TableBody>
+              </Table>
+            </CardContent>
+          </Card>
+        </TabsContent>
       </Tabs>
     </div>
   );
