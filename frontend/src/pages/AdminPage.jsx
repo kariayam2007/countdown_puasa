@@ -114,23 +114,29 @@ const AdminPage = () => {
   const fetchData = useCallback(async () => {
     setLoading(true);
     try {
-      const [tvcRes, berbukaRes, scheduleRes, stateRes] = await Promise.all([
+      const [tvcRes, berbukaRes, scheduleRes, stateRes, usersRes] = await Promise.all([
         axios.get(`${API}/tvc-videos`),
         axios.get(`${API}/berbuka-videos`),
         axios.get(`${API}/schedules`),
-        axios.get(`${API}/display-state`)
+        axios.get(`${API}/display-state`),
+        axios.get(`${API}/auth/users`, { headers: getAuthHeader() })
       ]);
       setTvcVideos(tvcRes.data);
       setBerbukaVideos(berbukaRes.data);
       setSchedules(scheduleRes.data);
       setDisplayState(stateRes.data);
+      setUsers(usersRes.data);
     } catch (error) {
       console.error("Error fetching data:", error);
-      toast.error("Gagal memuat data");
+      if (error.response?.status === 401) {
+        navigate("/login");
+      } else {
+        toast.error("Gagal memuat data");
+      }
     } finally {
       setLoading(false);
     }
-  }, []);
+  }, [navigate]);
 
   useEffect(() => {
     fetchData();
