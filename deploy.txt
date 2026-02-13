@@ -1,0 +1,342 @@
+==============================================
+PANDUAN DEPLOYMENT - FRESTEA RAMADAN COUNTDOWN
+==============================================
+
+## REQUIREMENTS
+
+### Server Requirements:
+- Ubuntu 20.04+ / Debian 11+
+- RAM: Minimal 2GB
+- Storage: Minimal 10GB
+- Node.js 18+
+- Python 3.10+
+- MongoDB 6.0+
+- Nginx (untuk reverse proxy)
+
+### Domain & SSL:
+- Domain yang sudah diarahkan ke server
+- SSL Certificate (bisa pakai Let's Encrypt)
+
+
+==============================================
+## LANGKAH 1: SETUP SERVER
+==============================================
+
+# Update system
+sudo apt update && sudo apt upgrade -y
+
+# Install dependencies
+sudo apt install -y curl git nginx certbot python3-certbot-nginx
+
+# Install Node.js 18
+curl -fsSL https://deb.nodesource.com/setup_18.x | sudo -E bash -
+sudo apt install -y nodejs
+
+# Install Yarn
+npm install -g yarn
+
+# Install Python 3.10+ dan pip
+sudo apt install -y python3 python3-pip python3-venv
+
+# Install MongoDB
+curl -fsSL https://pgp.mongodb.com/server-6.0.asc | sudo gpg -o /usr/share/keyrings/mongodb-server-6.0.gpg --dearmor
+echo "deb [ signed-by=/usr/share/keyrings/mongodb-server-6.0.gpg] http://repo.mongodb.org/apt/ubuntu jammy/mongodb-org/6.0 multiverse" | sudo tee /etc/apt/sources.list.d/mongodb-org-6.0.list
+sudo apt update
+sudo apt install -y mongodb-org
+sudo systemctl start mongod
+sudo systemctl enable mongod
+
+
+==============================================
+## LANGKAH 2: CLONE & SETUP PROJECT
+==============================================
+
+# Buat direktori aplikasi
+sudo mkdir -p /var/www/countdown
+sudo chown $USER:$USER /var/www/countdown
+cd /var/www/countdown
+
+# Clone repository (atau copy files)
+# git clone <your-repo-url> .
+
+# Atau copy manual dari lokal:
+# scp -r /app/* user@server:/var/www/countdown/
+
+
+==============================================
+## LANGKAH 3: SETUP BACKEND
+==============================================
+
+cd /var/www/countdown/backend
+
+# Buat virtual environment
+python3 -m venv venv
+source venv/bin/activate
+
+# Install dependencies
+pip install -r requirements.txt
+
+# Buat file .env
+cat > .env << 'EOF'
+MONGO_URL=mongodb://localhost:27017
+DB_NAME=frestea_countdown
+CORS_ORIGINS=https://yourdomain.com
+JWT_SECRET=your-super-secret-jwt-key-change-this
+EOF
+
+# Test backend
+python -c "from server import app; print('Backend OK')"
+
+
+==============================================
+## LANGKAH 4: SETUP FRONTEND
+==============================================
+
+cd /var/www/countdown/frontend
+
+# Install dependencies
+yarn install
+
+# Buat file .env
+cat > .env << 'EOF'
+REACT_APP_BACKEND_URL=https://yourdomain.com
+EOF
+
+# Build production
+yarn build
+
+
+==============================================
+## LANGKAH 5: SETUP SYSTEMD SERVICE (BACKEND)
+==============================================
+
+# Buat service file untuk backend
+sudo cat > /etc/systemd/system/countdown-backend.service << 'EOF'
+[Unit]
+Description=Frestea Countdown Backend
+After=network.target mongod.service
+
+[Service]
+Type=simple
+User=www-data
+Group=www-data
+WorkingDirectory=/var/www/countdown/backend
+Environment="PATH=/var/www/countdown/backend/venv/bin"
+ExecStart=/var/www/countdown/backend/venv/bin/uvicorn server:app --host 0.0.0.0 --port 8001
+Restart=always
+RestartSec=5
+
+[Install]
+WantedBy=multi-user.target
+EOF
+
+# Set permissions
+sudo chown -R www-data:www-data /var/www/countdown
+
+# Enable dan start service
+sudo systemctl daemon-reload
+sudo systemctl enable countdown-backend
+sudo systemctl start countdown-backend
+
+# Cek status
+sudo systemctl status countdown-backend
+
+
+==============================================
+## LANGKAH 6: SETUP NGINX
+==============================================
+
+# Buat Nginx config
+sudo cat > /etc/nginx/sites-available/countdown << 'EOF'
+server {
+    listen 80;
+    server_name yourdomain.com;
+
+    # Frontend - React build
+    location / {
+        root /var/www/countdown/frontend/build;
+        try_files $uri $uri/ /index.html;
+        
+        # Cache static files
+        location ~* \.(js|css|png|jpg|jpeg|gif|ico|svg|woff|woff2)$ {
+            expires 1y;
+            add_header Cache-Control "public, immutable";
+        }
+    }
+
+    # Backend API
+    location /api {
+        proxy_pass http://127.0.0.1:8001;
+        proxy_http_version 1.1;
+        proxy_set_header Upgrade $http_upgrade;
+        proxy_set_header Connection 'upgrade';
+        proxy_set_header Host $host;
+        proxy_set_header X-Real-IP $remote_addr;
+        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+        proxy_set_header X-Forwarded-Proto $scheme;
+        proxy_cache_bypass $http_upgrade;
+        proxy_read_timeout 300s;
+        proxy_connect_timeout 75s;
+    }
+}
+EOF
+
+# Enable site
+sudo ln -s /etc/nginx/sites-available/countdown /etc/nginx/sites-enabled/
+sudo rm -f /etc/nginx/sites-enabled/default
+
+# Test dan restart Nginx
+sudo nginx -t
+sudo systemctl restart nginx
+
+
+==============================================
+## LANGKAH 7: SETUP SSL (HTTPS)
+==============================================
+
+# Install SSL dengan Certbot
+sudo certbot --nginx -d yourdomain.com
+
+# Auto-renewal (sudah otomatis, tapi cek)
+sudo certbot renew --dry-run
+
+
+==============================================
+## LANGKAH 8: SETUP ADMIN PERTAMA
+==============================================
+
+# Buka browser dan akses:
+# https://yourdomain.com/login
+
+# Sistem akan menampilkan "Setup Admin"
+# Buat username dan password admin pertama
+
+
+==============================================
+## PERINTAH BERGUNA
+==============================================
+
+# Restart backend
+sudo systemctl restart countdown-backend
+
+# Lihat logs backend
+sudo journalctl -u countdown-backend -f
+
+# Restart Nginx
+sudo systemctl restart nginx
+
+# Lihat logs Nginx
+sudo tail -f /var/log/nginx/error.log
+
+# MongoDB shell
+mongosh
+
+# Backup database
+mongodump --db frestea_countdown --out /backup/$(date +%Y%m%d)
+
+# Restore database
+mongorestore --db frestea_countdown /backup/20260213/frestea_countdown
+
+
+==============================================
+## TROUBLESHOOTING
+==============================================
+
+### Backend tidak jalan:
+sudo systemctl status countdown-backend
+sudo journalctl -u countdown-backend -n 50
+
+### Frontend 502 Bad Gateway:
+- Pastikan backend running: curl http://localhost:8001/api/
+- Cek Nginx error log: sudo tail -f /var/log/nginx/error.log
+
+### MongoDB connection error:
+sudo systemctl status mongod
+sudo systemctl restart mongod
+
+### Permission denied:
+sudo chown -R www-data:www-data /var/www/countdown
+
+
+==============================================
+## UPDATE APLIKASI
+==============================================
+
+# 1. Pull/copy kode terbaru
+cd /var/www/countdown
+# git pull origin main
+
+# 2. Update backend
+cd backend
+source venv/bin/activate
+pip install -r requirements.txt
+sudo systemctl restart countdown-backend
+
+# 3. Update frontend
+cd ../frontend
+yarn install
+yarn build
+sudo systemctl restart nginx
+
+
+==============================================
+## DOCKER DEPLOYMENT (ALTERNATIF)
+==============================================
+
+# Jika ingin pakai Docker, buat docker-compose.yml:
+
+version: '3.8'
+
+services:
+  mongodb:
+    image: mongo:6.0
+    volumes:
+      - mongodb_data:/data/db
+    restart: always
+
+  backend:
+    build: ./backend
+    environment:
+      - MONGO_URL=mongodb://mongodb:27017
+      - DB_NAME=frestea_countdown
+      - JWT_SECRET=your-secret-key
+      - CORS_ORIGINS=https://yourdomain.com
+    depends_on:
+      - mongodb
+    restart: always
+
+  frontend:
+    build: ./frontend
+    ports:
+      - "80:80"
+      - "443:443"
+    depends_on:
+      - backend
+    restart: always
+
+volumes:
+  mongodb_data:
+
+# Jalankan dengan:
+docker-compose up -d
+
+
+==============================================
+## CATATAN PENTING
+==============================================
+
+1. GANTI semua "yourdomain.com" dengan domain Anda
+2. GANTI JWT_SECRET dengan string random yang kuat
+3. Pastikan firewall membuka port 80 dan 443
+4. Backup database secara berkala
+5. Monitor disk space untuk video files
+
+## STRUKTUR URL:
+- Display Page: https://yourdomain.com/
+- Login Admin: https://yourdomain.com/login
+- Admin Panel: https://yourdomain.com/admin
+- API: https://yourdomain.com/api/
+
+## KONTAK SUPPORT:
+- Email: support@example.com
+- Dokumentasi: https://docs.example.com
