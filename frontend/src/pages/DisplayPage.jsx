@@ -69,6 +69,14 @@ const DisplayPage = () => {
 
   const time = formatCountdown(countdown);
 
+  // Handle unmute
+  const toggleMute = () => {
+    if (videoRef.current) {
+      videoRef.current.muted = !isMuted;
+      setIsMuted(!isMuted);
+    }
+  };
+
   // Get current video URL
   const getCurrentVideoUrl = () => {
     if (displayState?.state === "berbuka" && displayState?.berbuka_video?.url) {
