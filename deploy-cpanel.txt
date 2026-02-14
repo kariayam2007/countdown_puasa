@@ -1,0 +1,338 @@
+==============================================
+PANDUAN DEPLOYMENT CPANEL
+FRESTEA RAMADAN COUNTDOWN
+==============================================
+
+## INFORMASI PENTING
+
+cPanel umumnya digunakan untuk hosting PHP. Untuk aplikasi ini 
+(React + FastAPI + MongoDB), ada beberapa opsi deployment:
+
+OPSI 1: Frontend di cPanel + Backend di VPS terpisah (RECOMMENDED)
+OPSI 2: Full deployment di cPanel dengan Python App (jika tersedia)
+OPSI 3: Frontend di cPanel + Backend di layanan cloud (Railway/Render)
+
+
+==============================================
+## OPSI 1: FRONTEND DI CPANEL + BACKEND DI VPS
+==============================================
+
+### A. DEPLOY FRONTEND DI CPANEL
+
+1. BUILD FRONTEND LOKAL
+-----------------------
+# Di komputer lokal, jalankan:
+cd /path/to/project/frontend
+
+# Edit .env untuk production
+echo "REACT_APP_BACKEND_URL=https://api.yourdomain.com" > .env
+
+# Build
+yarn install
+yarn build
+
+# Hasil build ada di folder 'build/'
+
+
+2. UPLOAD KE CPANEL
+-------------------
+a. Login ke cPanel
+b. Buka File Manager
+c. Masuk ke folder public_html (atau subdomain folder)
+d. Upload semua isi folder 'build/' ke public_html
+   - Bisa upload ZIP lalu extract di cPanel
+   
+Struktur setelah upload:
+public_html/
+├── index.html
+├── static/
+│   ├── css/
+│   ├── js/
+│   └── media/
+├── favicon.ico
+└── ...
+
+
+3. SETUP .HTACCESS UNTUK REACT ROUTER
+-------------------------------------
+Buat file .htaccess di public_html dengan isi:
+
+```
+<IfModule mod_rewrite.c>
+  RewriteEngine On
+  RewriteBase /
+  RewriteRule ^index\.html$ - [L]
+  RewriteCond %{REQUEST_FILENAME} !-f
+  RewriteCond %{REQUEST_FILENAME} !-d
+  RewriteCond %{REQUEST_FILENAME} !-l
+  RewriteRule . /index.html [L]
+</IfModule>
+
+# Cache static assets
+<IfModule mod_expires.c>
+  ExpiresActive On
+  ExpiresByType image/jpg "access plus 1 year"
+  ExpiresByType image/jpeg "access plus 1 year"
+  ExpiresByType image/gif "access plus 1 year"
+  ExpiresByType image/png "access plus 1 year"
+  ExpiresByType text/css "access plus 1 month"
+  ExpiresByType application/javascript "access plus 1 month"
+</IfModule>
+```
+
+
+### B. DEPLOY BACKEND DI VPS TERPISAH
+
+Ikuti panduan di file deploy.txt untuk setup VPS dengan:
+- Domain: api.yourdomain.com
+- Backend URL: https://api.yourdomain.com/api
+
+
+==============================================
+## OPSI 2: FULL DEPLOYMENT DI CPANEL (Python App)
+==============================================
+
+Jika cPanel Anda memiliki fitur "Setup Python App":
+
+### A. SETUP PYTHON APP
+
+1. Login cPanel → Setup Python App
+2. Klik "Create Application"
+3. Isi:
+   - Python version: 3.10+
+   - Application root: countdown_backend
+   - Application URL: api.yourdomain.com atau yourdomain.com/api
+   - Application startup file: passenger_wsgi.py
+   - Application Entry point: app
+
+4. Klik "Create"
+
+
+### B. UPLOAD BACKEND FILES
+
+1. Buka File Manager
+2. Masuk ke folder countdown_backend
+3. Upload file-file backend:
+
+countdown_backend/
+├── server.py
+├── requirements.txt
+├── .env
+└── passenger_wsgi.py (buat baru)
+
+
+### C. BUAT FILE passenger_wsgi.py
+
+Buat file baru 'passenger_wsgi.py' dengan isi:
+
+```python
+import sys
+import os
+
+# Add the app directory to path
+sys.path.insert(0, os.path.dirname(__file__))
+
+# Set environment variables
+os.environ['MONGO_URL'] = 'mongodb+srv://user:pass@cluster.mongodb.net'
+os.environ['DB_NAME'] = 'frestea_countdown'
+os.environ['JWT_SECRET'] = 'your-super-secret-key-here'
+
+from server import app
+
+# For Passenger
+application = app
+```
+
+
+### D. SETUP MONGODB
+
+cPanel tidak menyediakan MongoDB. Gunakan MongoDB Atlas:
+
+1. Daftar di https://www.mongodb.com/cloud/atlas
+2. Buat cluster gratis
+3. Buat database user
+4. Whitelist IP (0.0.0.0/0 untuk akses dari mana saja)
+5. Dapatkan connection string
+6. Update MONGO_URL di passenger_wsgi.py
+
+
+### E. INSTALL DEPENDENCIES
+
+1. Di cPanel → Setup Python App
+2. Klik "Enter to virtual environment" 
+3. Jalankan di terminal:
+   pip install -r requirements.txt
+
+
+### F. RESTART APPLICATION
+
+1. Di Setup Python App
+2. Klik "Restart" pada aplikasi
+
+
+### G. DEPLOY FRONTEND
+
+Sama seperti Opsi 1 bagian A, tapi ubah .env:
+```
+REACT_APP_BACKEND_URL=https://yourdomain.com
+```
+
+Lalu di server.py, pastikan CORS mengizinkan domain frontend.
+
+
+==============================================
+## OPSI 3: FRONTEND CPANEL + BACKEND CLOUD
+==============================================
+
+### A. DEPLOY BACKEND KE RAILWAY (GRATIS)
+
+1. Daftar di https://railway.app
+2. Connect GitHub repository
+3. Pilih folder backend
+4. Set environment variables:
+   - MONGO_URL=mongodb+srv://...
+   - DB_NAME=frestea_countdown
+   - JWT_SECRET=your-secret-key
+   - CORS_ORIGINS=https://yourdomain.com
+
+5. Deploy, dapatkan URL seperti:
+   https://countdown-backend.up.railway.app
+
+
+### B. DEPLOY FRONTEND KE CPANEL
+
+1. Edit frontend/.env:
+   REACT_APP_BACKEND_URL=https://countdown-backend.up.railway.app
+
+2. Build dan upload seperti Opsi 1 bagian A
+
+
+==============================================
+## KONFIGURASI TAMBAHAN CPANEL
+==============================================
+
+### SSL/HTTPS
+
+1. cPanel → SSL/TLS
+2. Atau gunakan Let's Encrypt:
+   cPanel → Let's Encrypt SSL
+3. Install certificate untuk domain
+
+
+### SUBDOMAIN UNTUK API (Opsional)
+
+1. cPanel → Subdomains
+2. Buat subdomain: api.yourdomain.com
+3. Arahkan ke folder terpisah untuk backend
+
+
+### CRON JOB (Opsional)
+
+Untuk restart backend otomatis:
+1. cPanel → Cron Jobs
+2. Tambah job:
+   0 */6 * * * /usr/bin/touch /home/username/countdown_backend/passenger_wsgi.py
+
+
+==============================================
+## STRUKTUR FILE FINAL
+==============================================
+
+### Frontend (public_html/)
+```
+public_html/
+├── .htaccess
+├── index.html
+├── favicon.ico
+├── manifest.json
+├── robots.txt
+└── static/
+    ├── css/
+    │   └── main.xxxxxxxx.css
+    ├── js/
+    │   ├── main.xxxxxxxx.js
+    │   └── xxxxxxxx.chunk.js
+    └── media/
+```
+
+### Backend (countdown_backend/ - jika pakai Python App)
+```
+countdown_backend/
+├── server.py
+├── requirements.txt
+├── .env
+├── passenger_wsgi.py
+└── tmp/
+    └── restart.txt
+```
+
+
+==============================================
+## TROUBLESHOOTING CPANEL
+==============================================
+
+### Error 500 Internal Server Error
+- Cek error_log di File Manager
+- Pastikan file permissions: 644 untuk file, 755 untuk folder
+
+### React Router tidak bekerja
+- Pastikan .htaccess sudah benar
+- Cek mod_rewrite aktif (hubungi hosting)
+
+### Backend tidak bisa connect MongoDB
+- Cek whitelist IP di MongoDB Atlas
+- Verifikasi connection string
+
+### CORS Error
+- Pastikan CORS_ORIGINS di backend sesuai domain frontend
+- Tambahkan domain dengan https://
+
+### Video tidak bisa dimuat
+- Pastikan video URL accessible
+- Upload video ke hosting yang sama atau CDN
+
+
+==============================================
+## CHECKLIST DEPLOYMENT
+==============================================
+
+[ ] MongoDB Atlas setup dan connection string didapat
+[ ] Backend deployed dan accessible (test: curl https://api.domain.com/api/)
+[ ] Frontend .env diupdate dengan backend URL
+[ ] Frontend build berhasil
+[ ] Upload frontend ke public_html
+[ ] .htaccess dibuat untuk React Router
+[ ] SSL/HTTPS aktif
+[ ] Test login admin
+[ ] Test tambah video dan jadwal
+[ ] Test countdown display
+
+
+==============================================
+## CATATAN PENTING
+==============================================
+
+1. cPanel TIDAK ideal untuk FastAPI/Python apps
+   - Pertimbangkan VPS (DigitalOcean, Linode, Vultr) untuk backend
+   - Atau gunakan Railway/Render untuk backend
+
+2. MongoDB HARUS menggunakan MongoDB Atlas (cloud)
+   - cPanel tidak menyediakan MongoDB
+
+3. Jika hosting tidak support Python App:
+   - Gunakan Opsi 1 atau Opsi 3
+   - Backend di server terpisah
+
+4. Untuk production dengan traffic tinggi:
+   - Gunakan VPS dedicated
+   - Jangan andalkan shared hosting cPanel
+
+
+==============================================
+## KONTAK & SUPPORT
+==============================================
+
+Jika ada masalah deployment:
+1. Cek error log di cPanel
+2. Test API dengan curl/Postman
+3. Pastikan semua environment variables terisi
