@@ -100,7 +100,7 @@ pip install -r requirements.txt
 cat > .env << 'EOF'
 MONGO_URL=mongodb://localhost:27017
 DB_NAME=frestea_countdown
-CORS_ORIGINS=https://yourdomain.com
+CORS_ORIGINS=https://astatechsys.com
 JWT_SECRET=your-super-secret-jwt-key-change-this
 EOF
 
@@ -119,7 +119,7 @@ yarn install
 
 # Buat file .env
 cat > .env << 'EOF'
-REACT_APP_BACKEND_URL=https://yourdomain.com
+REACT_APP_BACKEND_URL=https://astatechsys.com
 EOF
 
 # Build production
@@ -215,7 +215,7 @@ sudo systemctl restart nginx
 ==============================================
 
 # Install SSL dengan Certbot
-sudo certbot --nginx -d yourdomain.com
+sudo certbot --nginx -d astatechsys.com
 
 # Auto-renewal (sudah otomatis, tapi cek)
 sudo certbot renew --dry-run
@@ -352,10 +352,10 @@ docker-compose up -d
 5. Monitor disk space untuk video files
 
 ## STRUKTUR URL:
-- Display Page: https://yourdomain.com/
-- Login Admin: https://yourdomain.com/login
-- Admin Panel: https://yourdomain.com/admin
-- API: https://yourdomain.com/api/
+- Display Page: https://astatechsys.com/
+- Login Admin: https://astatechsys.com/login
+- Admin Panel: https://astatechsys.com/admin
+- API: https://astatechsys.com/api/
 
 ## KONTAK SUPPORT:
 - Email: support@example.com
