@@ -96,6 +96,10 @@ source venv/bin/activate
 # Install dependencies
 pip install -r requirements.txt
 
+# Buat folder uploads untuk video
+mkdir -p uploads/videos
+chmod 755 uploads/videos
+
 # Buat file .env
 cat > .env << 'EOF'
 MONGO_URL=mongodb://localhost:27017
