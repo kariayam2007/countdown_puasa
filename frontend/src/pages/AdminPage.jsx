@@ -562,7 +562,7 @@ const AdminPage = () => {
             </CardHeader>
             <CardContent className="space-y-6">
               {/* Add TVC Form */}
-              <div className="grid grid-cols-1 md:grid-cols-4 gap-4 p-4 bg-frestea-dark/50 rounded-lg">
+              <div className="grid grid-cols-1 md:grid-cols-5 gap-4 p-4 bg-frestea-dark/50 rounded-lg">
                 <div>
                   <Label className="text-purple-300">Nama Video</Label>
                   <Input
@@ -582,6 +582,31 @@ const AdminPage = () => {
                     className="bg-frestea-surface border-frestea-purple/30"
                     data-testid="tvc-url-input"
                   />
+                </div>
+                <div>
+                  <Label className="text-purple-300">Upload Video</Label>
+                  <div className="relative">
+                    <input
+                      type="file"
+                      accept="video/mp4,video/webm,video/ogg"
+                      onChange={handleUploadTvc}
+                      className="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
+                      disabled={uploadingTvc}
+                      data-testid="tvc-upload-input"
+                    />
+                    <Button 
+                      variant="outline" 
+                      className="w-full border-dashed border-frestea-purple/50"
+                      disabled={uploadingTvc}
+                    >
+                      {uploadingTvc ? (
+                        <RefreshCw className="w-4 h-4 mr-2 animate-spin" />
+                      ) : (
+                        <Upload className="w-4 h-4 mr-2" />
+                      )}
+                      {uploadingTvc ? "Uploading..." : "Upload"}
+                    </Button>
+                  </div>
                 </div>
                 <div className="flex items-end">
                   <Button onClick={handleAddTvc} className="w-full bg-frestea-purple hover:bg-frestea-purple/80" data-testid="add-tvc-btn">
