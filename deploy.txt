@@ -45,9 +45,12 @@ sudo apt update && sudo apt upgrade -y
 # Install dependencies
 sudo apt install -y curl git nginx certbot python3-certbot-nginx
 
-# Install Node.js 18
-curl -fsSL https://deb.nodesource.com/setup_18.x | sudo -E bash -
+# Install Node.js 20 (LTS - Recommended)
+curl -fsSL https://deb.nodesource.com/setup_20.x | sudo -E bash -
 sudo apt install -y nodejs
+
+# Verifikasi versi Node.js
+node -v  # Harus >= 20.0.0
 
 # Install Yarn
 npm install -g yarn
