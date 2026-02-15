@@ -40,7 +40,9 @@ import {
   LogOut,
   Users,
   Key,
-  UserPlus
+  UserPlus,
+  Upload,
+  FileVideo
 } from "lucide-react";
 import { format } from "date-fns";
 
