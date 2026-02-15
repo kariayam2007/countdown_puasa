@@ -149,6 +149,38 @@ const AdminPage = () => {
   }, [fetchData]);
 
   // TVC Video handlers
+  const handleUploadTvc = async (e) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    
+    setUploadingTvc(true);
+    const formData = new FormData();
+    formData.append("file", file);
+    
+    try {
+      const response = await axios.post(`${API}/upload/video`, formData, {
+        headers: { 
+          ...getAuthHeader(),
+          "Content-Type": "multipart/form-data"
+        }
+      });
+      
+      // Auto-fill URL
+      const videoUrl = `${BACKEND_URL}${response.data.url}`;
+      setNewTvc(prev => ({ ...prev, url: videoUrl, name: file.name.replace(/\.[^/.]+$/, "") }));
+      toast.success("Video berhasil diupload");
+    } catch (error) {
+      if (error.response?.status === 401) {
+        navigate("/login");
+      } else {
+        toast.error(error.response?.data?.detail || "Gagal upload video");
+      }
+    } finally {
+      setUploadingTvc(false);
+      e.target.value = "";
+    }
+  };
+
   const handleAddTvc = async () => {
     if (!newTvc.name || !newTvc.url) {
       toast.error("Nama dan URL video harus diisi");
