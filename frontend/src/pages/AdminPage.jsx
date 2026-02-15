@@ -112,6 +112,10 @@ const AdminPage = () => {
   const [resetPassword, setResetPassword] = useState({ user_id: "", password: "" });
   const [showChangePassword, setShowChangePassword] = useState(false);
   const [showResetPassword, setShowResetPassword] = useState(false);
+  
+  // Upload states
+  const [uploadingTvc, setUploadingTvc] = useState(false);
+  const [uploadingBerbuka, setUploadingBerbuka] = useState(false);
 
   const fetchData = useCallback(async () => {
     setLoading(true);
