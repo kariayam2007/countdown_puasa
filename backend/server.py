@@ -296,6 +296,41 @@ async def reset_user_password(user_id: str, request: LoginRequest, username: str
     
     return {"message": "Password berhasil direset"}
 
+# ============ FILE UPLOAD ENDPOINTS ============
+
+@api_router.post("/upload/video")
+async def upload_video(file: UploadFile = File(...), username: str = Depends(verify_token)):
+    """Upload video file"""
+    # Validate file type
+    allowed_types = ["video/mp4", "video/webm", "video/ogg", "video/quicktime"]
+    if file.content_type not in allowed_types:
+        raise HTTPException(status_code=400, detail="Format video tidak didukung. Gunakan MP4, WebM, atau OGG")
+    
+    # Generate unique filename
+    file_ext = file.filename.split(".")[-1] if "." in file.filename else "mp4"
+    unique_filename = f"{uuid.uuid4()}.{file_ext}"
+    file_path = UPLOAD_DIR / unique_filename
+    
+    # Save file
+    try:
+        with open(file_path, "wb") as buffer:
+            shutil.copyfileobj(file.file, buffer)
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Gagal menyimpan file: {str(e)}")
+    
+    # Return URL
+    video_url = f"/api/videos/{unique_filename}"
+    return {"url": video_url, "filename": unique_filename}
+
+@api_router.delete("/upload/video/{filename}")
+async def delete_video_file(filename: str, username: str = Depends(verify_token)):
+    """Delete uploaded video file"""
+    file_path = UPLOAD_DIR / filename
+    if file_path.exists():
+        os.remove(file_path)
+        return {"message": "File berhasil dihapus"}
+    raise HTTPException(status_code=404, detail="File tidak ditemukan")
+
 # ============ TVC VIDEO ENDPOINTS (PROTECTED) ============
 
 @api_router.get("/tvc-videos", response_model=List[TVCVideo])
