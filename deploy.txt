@@ -2,6 +2,23 @@
 PANDUAN DEPLOYMENT - FRESTEA RAMADAN COUNTDOWN
 ==============================================
 
+## PENTING: REQUIREMENTS.TXT
+
+File requirements.txt berisi dependencies minimal:
+```
+fastapi==0.110.1
+uvicorn==0.25.0
+motor==3.3.1
+pymongo==4.5.0
+python-dotenv==1.2.1
+pydantic==2.12.5
+pytz==2025.2
+bcrypt==4.1.3
+PyJWT==2.11.0
+python-multipart==0.0.22
+```
+
+
 ## REQUIREMENTS
 
 ### Server Requirements:
