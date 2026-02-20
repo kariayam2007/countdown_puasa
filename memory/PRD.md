@@ -15,33 +15,50 @@ Website countdown Ramadan dengan flow:
 - Single location (Bekasi)
 - Design minimalis dengan background dan countdown
 
-## What's Been Implemented (Jan 2026)
+## What's Been Implemented
 
 ### Backend (FastAPI + MongoDB)
 - `/api/tvc-videos` - CRUD untuk video TVC
 - `/api/berbuka-videos` - CRUD untuk video berbuka
 - `/api/schedules` - CRUD untuk jadwal maghrib
 - `/api/display-state` - Logic state: TVC/countdown/berbuka
+- `/api/auth/login` - JWT authentication
+- `/api/users` - User management (create, change password, reset password)
+- `/api/videos/upload` - Video file upload
 
 ### Frontend (React)
-- Display Page (`/`) - Tampilan video/countdown
-- Admin Page (`/admin`) - 3 tabs: Video TVC, Video Berbuka, Jadwal Maghrib
+- Display Page (`/`) - Tampilan video/countdown dengan font Agriculture kustom
+- Admin Page (`/admin`) - Tabs: Video TVC, Video Berbuka, Jadwal Maghrib, User Management
+- Login Page (`/login`) - JWT authentication
 
-### Flow Logic
-1. Normal: Tampilkan TVC looping
-2. 120 menit sebelum maghrib: Tampilkan countdown
-3. Waktu maghrib: Tampilkan video berbuka selama durasi yang ditentukan
-4. Setelah berbuka: Kembali ke TVC
+### Flow Logic (Updated)
+1. **Subuh - Maghrib**: Tampilkan countdown only (background ungu, tanpa video)
+2. **Waktu Maghrib**: Tampilkan video berbuka looping selama durasi yang ditentukan
+3. **Setelah Berbuka**: Tampilkan TVC looping
+
+### UI Customization
+- Font countdown: **Agriculture** (custom font dengan outline/stroke effect)
+- Background countdown: Ungu (#5B4B9E)
+- Text effect: Aquamarine outline (#7FFFD4)
+
+## Completed Tasks (Feb 2026)
+- ✅ Core countdown logic
+- ✅ Admin panel CRUD
+- ✅ Display page dengan state transitions
+- ✅ JWT Authentication & Login
+- ✅ User Management
+- ✅ Video Upload Feature
+- ✅ Custom Agriculture Font Implementation
+- ✅ Deployment guides (VPS & cPanel)
 
 ## Prioritized Backlog
-- P0: ✅ Core countdown logic
-- P0: ✅ Admin panel CRUD
-- P0: ✅ Display page dengan state transitions
-- P1: Bulk import jadwal (available)
+- P1: Import jadwal dari CSV/Excel
 - P2: Multi-location support
 - P2: Preset jadwal Ramadan
 
-## Next Tasks
-1. Add sample TVC video URLs
-2. Add berbuka video
-3. Input jadwal maghrib untuk tanggal yang diperlukan
+## Credentials
+- Admin: `admin` / `admin123`
+
+## Deployment Files
+- `/app/deploy.txt` - VPS deployment guide
+- `/app/deploy-cpanel.txt` - cPanel deployment guide
