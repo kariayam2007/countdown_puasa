@@ -47,12 +47,18 @@ const DisplayPage = () => {
     }
   }, [displayState?.state, countdown, fetchDisplayState]);
 
-  // Get video URL
+  // Get video URL based on state
   const getVideoUrl = () => {
+    // Countdown state = NO VIDEO, only countdown display
+    if (displayState?.state === "countdown") {
+      return null;
+    }
+    // Berbuka state = Berbuka video only
     if (displayState?.state === "berbuka" && displayState?.berbuka_video?.url) {
       return displayState.berbuka_video.url;
     }
-    if (displayState?.current_tvc_videos?.length > 0) {
+    // TVC state = TVC videos
+    if (displayState?.state === "tvc" && displayState?.current_tvc_videos?.length > 0) {
       return displayState.current_tvc_videos[currentVideoIndex]?.url;
     }
     return null;
@@ -63,17 +69,23 @@ const DisplayPage = () => {
 
   // Handle video ended - loop video
   const handleVideoEnded = () => {
-    console.log("Video ended, looping...");
-    
-    if (displayState?.state === "berbuka" || videoCount <= 1) {
-      // Single video - restart
+    if (displayState?.state === "berbuka") {
+      // Berbuka - restart video
       if (videoRef.current) {
         videoRef.current.currentTime = 0;
         videoRef.current.play();
       }
-    } else {
-      // Multiple videos - next in playlist
-      setCurrentVideoIndex((prev) => (prev + 1) % videoCount);
+    } else if (displayState?.state === "tvc") {
+      if (videoCount <= 1) {
+        // Single TVC video - restart
+        if (videoRef.current) {
+          videoRef.current.currentTime = 0;
+          videoRef.current.play();
+        }
+      } else {
+        // Multiple TVC videos - next in playlist
+        setCurrentVideoIndex((prev) => (prev + 1) % videoCount);
+      }
     }
   };
 
@@ -102,97 +114,180 @@ const DisplayPage = () => {
 
   return (
     <div data-testid="display-page" className="relative w-screen h-screen overflow-hidden bg-frestea-dark">
-      {/* Background Video */}
-      <div className="absolute inset-0 z-0">
-        {videoUrl && (
-          <video
-            ref={videoRef}
-            key={videoUrl}
-            src={videoUrl}
-            className="w-full h-full object-cover"
-            autoPlay
-            muted={isMuted}
-            playsInline
-            onEnded={handleVideoEnded}
-            data-testid="video-player"
-          />
-        )}
-        {!videoUrl && (
+      
+      {/* ============ STATE: COUNTDOWN ============ */}
+      {/* Dari Subuh sampai Maghrib - HANYA COUNTDOWN, tanpa video */}
+      {displayState?.state === "countdown" && (
+        <div className="absolute inset-0 z-0">
+          {/* Background gradient */}
           <div 
-            className="w-full h-full bg-cover bg-center"
-            style={{ backgroundImage: `url('https://images.unsplash.com/photo-1756999386217-a82d882d407d')` }}
-            data-testid="background-image"
+            className="w-full h-full"
+            style={{
+              background: "radial-gradient(ellipse at center, #1A0B2E 0%, #0F0518 70%)"
+            }}
           />
-        )}
-        <div className="absolute inset-0 video-overlay" />
-      </div>
-
-      {/* Content */}
-      <div className="relative z-20 flex flex-col items-center justify-center h-full px-4">
-        {/* Sound Toggle & Status */}
-        <div className="absolute top-8 right-8 flex items-center gap-4">
-          {videoUrl && (
-            <button onClick={toggleMute} className="p-3 rounded-full bg-black/50 hover:bg-black/70" data-testid="sound-toggle-btn">
-              {isMuted ? <VolumeX className="w-6 h-6 text-white" /> : <Volume2 className="w-6 h-6 text-frestea-green" />}
-            </button>
-          )}
-          <span data-testid="status-badge" className={`px-4 py-2 rounded-full text-sm font-bold uppercase ${
-            displayState?.state === "tvc" ? "status-tvc" : displayState?.state === "countdown" ? "status-countdown" : "status-berbuka"
-          }`}>
-            {displayState?.state?.toUpperCase() || "LOADING"}
-          </span>
-        </div>
-
-        {/* Countdown */}
-        {displayState?.state === "countdown" && (
-          <div className="animate-fade-in text-center" data-testid="countdown-display">
-            <div className="mb-8">
-              <h2 className="font-heading text-4xl md:text-6xl text-frestea-gold">Menuju Waktu Berbuka</h2>
-              <p className="text-lg md:text-xl text-purple-300 mt-2">Buka Puasa • Buka Frestea</p>
+          
+          {/* Countdown Content */}
+          <div className="absolute inset-0 flex flex-col items-center justify-center px-4">
+            {/* Location */}
+            {displayState?.location && (
+              <div className="mb-4">
+                <span className="text-purple-400 text-lg uppercase tracking-widest">
+                  {displayState.location}
+                </span>
+              </div>
+            )}
+            
+            {/* Header */}
+            <div className="mb-8 text-center">
+              <h2 className="font-heading text-4xl md:text-6xl text-frestea-gold tracking-wide">
+                Menuju Waktu Berbuka
+              </h2>
+              <p className="text-lg md:text-xl text-purple-300 mt-2">
+                Buka Puasa • Buka Frestea
+              </p>
             </div>
+
+            {/* Countdown Timer */}
             <div className="flex items-center justify-center gap-4 md:gap-8">
               <div className="flex flex-col items-center">
-                <span className="font-mono text-7xl md:text-9xl lg:text-[12rem] text-frestea-gold countdown-glow" data-testid="countdown-hours">{time.hours}</span>
-                <span className="text-purple-300 text-sm uppercase mt-2">Jam</span>
+                <span className="font-mono text-7xl md:text-9xl lg:text-[12rem] text-frestea-gold countdown-glow" data-testid="countdown-hours">
+                  {time.hours}
+                </span>
+                <span className="text-purple-300 text-sm md:text-base uppercase tracking-widest mt-2">Jam</span>
               </div>
-              <span className="font-mono text-5xl md:text-7xl text-frestea-gold">:</span>
+              <span className="font-mono text-5xl md:text-7xl lg:text-9xl text-frestea-gold">:</span>
               <div className="flex flex-col items-center">
-                <span className="font-mono text-7xl md:text-9xl lg:text-[12rem] text-frestea-gold countdown-glow" data-testid="countdown-minutes">{time.minutes}</span>
-                <span className="text-purple-300 text-sm uppercase mt-2">Menit</span>
+                <span className="font-mono text-7xl md:text-9xl lg:text-[12rem] text-frestea-gold countdown-glow" data-testid="countdown-minutes">
+                  {time.minutes}
+                </span>
+                <span className="text-purple-300 text-sm md:text-base uppercase tracking-widest mt-2">Menit</span>
               </div>
-              <span className="font-mono text-5xl md:text-7xl text-frestea-gold">:</span>
+              <span className="font-mono text-5xl md:text-7xl lg:text-9xl text-frestea-gold">:</span>
               <div className="flex flex-col items-center">
-                <span className="font-mono text-7xl md:text-9xl lg:text-[12rem] text-frestea-gold countdown-glow" data-testid="countdown-seconds">{time.secs}</span>
-                <span className="text-purple-300 text-sm uppercase mt-2">Detik</span>
+                <span className="font-mono text-7xl md:text-9xl lg:text-[12rem] text-frestea-gold countdown-glow" data-testid="countdown-seconds">
+                  {time.secs}
+                </span>
+                <span className="text-purple-300 text-sm md:text-base uppercase tracking-widest mt-2">Detik</span>
               </div>
             </div>
-            {displayState?.maghrib_time && (
-              <p className="text-purple-300 text-lg mt-12">Waktu Maghrib: <span className="text-frestea-green font-bold">{displayState.maghrib_time}</span> WIB</p>
-            )}
-          </div>
-        )}
 
-        {/* Berbuka */}
-        {displayState?.state === "berbuka" && (
-          <div className="animate-fade-in text-center" data-testid="berbuka-display">
-            <h1 className="font-heading text-6xl md:text-8xl text-frestea-gold countdown-glow">Selamat Berbuka!</h1>
-            <p className="text-2xl md:text-3xl text-frestea-green mt-6">Buka Puasa • Buka Frestea</p>
+            {/* Prayer Times Info */}
+            <div className="mt-12 text-center">
+              {displayState?.subuh_time && (
+                <p className="text-purple-400 text-base">
+                  Subuh: <span className="text-white font-bold">{displayState.subuh_time}</span> WIB
+                </p>
+              )}
+              {displayState?.maghrib_time && (
+                <p className="text-purple-300 text-lg mt-2">
+                  Maghrib: <span className="text-frestea-green font-bold">{displayState.maghrib_time}</span> WIB
+                </p>
+              )}
+            </div>
           </div>
-        )}
+        </div>
+      )}
 
-        {/* TVC */}
-        {displayState?.state === "tvc" && (
-          <div className="animate-fade-in text-center" data-testid="tvc-display">
-            <h1 className="font-heading text-5xl md:text-7xl text-white">Frestea</h1>
-            <p className="text-xl md:text-2xl text-frestea-green mt-4">Berasa Refresh Beneran</p>
-            {displayState?.maghrib_time && (
-              <p className="text-purple-300 text-base mt-8">Waktu Maghrib: <span className="text-frestea-gold font-bold">{displayState.maghrib_time}</span> WIB</p>
-            )}
-          </div>
-        )}
-      </div>
+      {/* ============ STATE: BERBUKA ============ */}
+      {/* Setelah Maghrib - HANYA VIDEO BERBUKA, tanpa tulisan apapun */}
+      {displayState?.state === "berbuka" && (
+        <div className="absolute inset-0 z-0">
+          {videoUrl ? (
+            <video
+              ref={videoRef}
+              key="berbuka-video"
+              src={videoUrl}
+              className="w-full h-full object-cover"
+              autoPlay
+              muted={isMuted}
+              playsInline
+              onEnded={handleVideoEnded}
+              data-testid="berbuka-video-player"
+            />
+          ) : (
+            <div className="w-full h-full flex items-center justify-center bg-frestea-dark">
+              <p className="text-frestea-gold text-2xl">Video Berbuka tidak tersedia</p>
+            </div>
+          )}
+          
+          {/* Sound Toggle - only control, no text */}
+          {videoUrl && (
+            <button
+              onClick={toggleMute}
+              className="absolute top-8 right-8 p-3 rounded-full bg-black/50 hover:bg-black/70 transition-colors z-10"
+              data-testid="sound-toggle-btn"
+            >
+              {isMuted ? (
+                <VolumeX className="w-6 h-6 text-white" />
+              ) : (
+                <Volume2 className="w-6 h-6 text-frestea-green" />
+              )}
+            </button>
+          )}
+        </div>
+      )}
 
-      <a href="/login" className="absolute bottom-4 right-4 text-purple-500 hover:text-purple-300 text-sm z-30" data-testid="admin-link">Admin Panel →</a>
+      {/* ============ STATE: TVC ============ */}
+      {/* Setelah Berbuka selesai - VIDEO TVC looping */}
+      {displayState?.state === "tvc" && (
+        <div className="absolute inset-0 z-0">
+          {videoUrl ? (
+            <video
+              ref={videoRef}
+              key={`tvc-video-${currentVideoIndex}`}
+              src={videoUrl}
+              className="w-full h-full object-cover"
+              autoPlay
+              muted={isMuted}
+              playsInline
+              onEnded={handleVideoEnded}
+              data-testid="tvc-video-player"
+            />
+          ) : (
+            <div 
+              className="w-full h-full flex items-center justify-center"
+              style={{
+                background: "radial-gradient(ellipse at center, #1A0B2E 0%, #0F0518 70%)"
+              }}
+            >
+              <div className="text-center">
+                <h1 className="font-heading text-5xl md:text-7xl text-white">Frestea</h1>
+                <p className="text-xl md:text-2xl text-frestea-green mt-4">Berasa Refresh Beneran</p>
+                {displayState?.maghrib_time && (
+                  <p className="text-purple-300 text-base mt-8">
+                    Maghrib Hari Ini: <span className="text-frestea-gold font-bold">{displayState.maghrib_time}</span> WIB
+                  </p>
+                )}
+              </div>
+            </div>
+          )}
+          
+          {/* Sound Toggle for TVC */}
+          {videoUrl && (
+            <button
+              onClick={toggleMute}
+              className="absolute top-8 right-8 p-3 rounded-full bg-black/50 hover:bg-black/70 transition-colors z-10"
+              data-testid="sound-toggle-btn"
+            >
+              {isMuted ? (
+                <VolumeX className="w-6 h-6 text-white" />
+              ) : (
+                <Volume2 className="w-6 h-6 text-frestea-green" />
+              )}
+            </button>
+          )}
+        </div>
+      )}
+
+      {/* Admin Link - always visible */}
+      <a 
+        href="/login" 
+        className="absolute bottom-4 right-4 text-purple-500 hover:text-purple-300 text-sm z-30 opacity-50 hover:opacity-100 transition-opacity" 
+        data-testid="admin-link"
+      >
+        Admin →
+      </a>
     </div>
   );
 };
