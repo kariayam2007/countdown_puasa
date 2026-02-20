@@ -119,71 +119,26 @@ const DisplayPage = () => {
       {/* Dari Subuh sampai Maghrib - HANYA COUNTDOWN, tanpa video */}
       {displayState?.state === "countdown" && (
         <div className="absolute inset-0 z-0">
-          {/* Background gradient */}
+          {/* Background solid purple */}
           <div 
             className="w-full h-full"
-            style={{
-              background: "radial-gradient(ellipse at center, #1A0B2E 0%, #0F0518 70%)"
-            }}
+            style={{ backgroundColor: "#5B4B9E" }}
           />
           
-          {/* Countdown Content */}
-          <div className="absolute inset-0 flex flex-col items-center justify-center px-4">
-            {/* Location */}
-            {displayState?.location && (
-              <div className="mb-4">
-                <span className="text-purple-400 text-lg uppercase tracking-widest">
-                  {displayState.location}
-                </span>
-              </div>
-            )}
-            
-            {/* Header */}
-            <div className="mb-8 text-center">
-              <h2 className="font-heading text-4xl md:text-6xl text-frestea-gold tracking-wide">
-                Menuju Waktu Berbuka
-              </h2>
-              <p className="text-lg md:text-xl text-purple-300 mt-2">
-                Buka Puasa • Buka Frestea
-              </p>
-            </div>
-
-            {/* Countdown Timer */}
-            <div className="flex items-center justify-center gap-4 md:gap-8">
-              <div className="flex flex-col items-center">
-                <span className="font-mono text-7xl md:text-9xl lg:text-[12rem] text-frestea-gold countdown-glow" data-testid="countdown-hours">
-                  {time.hours}
-                </span>
-                <span className="text-purple-300 text-sm md:text-base uppercase tracking-widest mt-2">Jam</span>
-              </div>
-              <span className="font-mono text-5xl md:text-7xl lg:text-9xl text-frestea-gold">:</span>
-              <div className="flex flex-col items-center">
-                <span className="font-mono text-7xl md:text-9xl lg:text-[12rem] text-frestea-gold countdown-glow" data-testid="countdown-minutes">
-                  {time.minutes}
-                </span>
-                <span className="text-purple-300 text-sm md:text-base uppercase tracking-widest mt-2">Menit</span>
-              </div>
-              <span className="font-mono text-5xl md:text-7xl lg:text-9xl text-frestea-gold">:</span>
-              <div className="flex flex-col items-center">
-                <span className="font-mono text-7xl md:text-9xl lg:text-[12rem] text-frestea-gold countdown-glow" data-testid="countdown-seconds">
-                  {time.secs}
-                </span>
-                <span className="text-purple-300 text-sm md:text-base uppercase tracking-widest mt-2">Detik</span>
-              </div>
-            </div>
-
-            {/* Prayer Times Info */}
-            <div className="mt-12 text-center">
-              {displayState?.subuh_time && (
-                <p className="text-purple-400 text-base">
-                  Subuh: <span className="text-white font-bold">{displayState.subuh_time}</span> WIB
-                </p>
-              )}
-              {displayState?.maghrib_time && (
-                <p className="text-purple-300 text-lg mt-2">
-                  Maghrib: <span className="text-frestea-green font-bold">{displayState.maghrib_time}</span> WIB
-                </p>
-              )}
+          {/* Countdown Content - ONLY NUMBERS */}
+          <div className="absolute inset-0 flex items-center justify-center">
+            <div className="flex items-center justify-center gap-2 md:gap-4">
+              <span className="font-mono text-7xl md:text-9xl lg:text-[14rem] text-[#7FFFD4] countdown-glow" data-testid="countdown-hours">
+                {time.hours}
+              </span>
+              <span className="font-mono text-6xl md:text-8xl lg:text-[12rem] text-[#7FFFD4]">:</span>
+              <span className="font-mono text-7xl md:text-9xl lg:text-[14rem] text-[#7FFFD4] countdown-glow" data-testid="countdown-minutes">
+                {time.minutes}
+              </span>
+              <span className="font-mono text-6xl md:text-8xl lg:text-[12rem] text-[#7FFFD4]">:</span>
+              <span className="font-mono text-7xl md:text-9xl lg:text-[14rem] text-[#7FFFD4] countdown-glow" data-testid="countdown-seconds">
+                {time.secs}
+              </span>
             </div>
           </div>
         </div>
