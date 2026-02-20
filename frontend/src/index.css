@@ -3,14 +3,14 @@
 /* Custom Agriculture Font */
 @font-face {
     font-family: 'Agriculture';
-    src: url('/fonts/Agriculture.otf') format('opentype');
+    src: url('../public/fonts/Agriculture.otf') format('opentype');
     font-weight: bold;
     font-style: normal;
 }
 
 @font-face {
     font-family: 'Agriculture';
-    src: url('/fonts/Agriculture-Regular.otf') format('opentype');
+    src: url('../public/fonts/Agriculture-Regular.otf') format('opentype');
     font-weight: normal;
     font-style: normal;
 }
