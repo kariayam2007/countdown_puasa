@@ -128,15 +128,15 @@ const DisplayPage = () => {
           {/* Countdown Content - ONLY NUMBERS */}
           <div className="absolute inset-0 flex items-center justify-center">
             <div className="flex items-center justify-center gap-2 md:gap-4">
-              <span className="text-7xl md:text-9xl lg:text-[14rem] text-[#7FFFD4] countdown-glow" style={{ fontFamily: "'Orbitron', sans-serif", fontWeight: 900 }} data-testid="countdown-hours">
+              <span className="text-7xl md:text-9xl lg:text-[14rem] text-[#7FFFD4]" style={{ fontFamily: "'Orbitron', sans-serif", fontWeight: 900 }} data-testid="countdown-hours">
                 {time.hours}
               </span>
               <span className="text-6xl md:text-8xl lg:text-[12rem] text-[#7FFFD4]" style={{ fontFamily: "'Orbitron', sans-serif", fontWeight: 900 }}>:</span>
-              <span className="text-7xl md:text-9xl lg:text-[14rem] text-[#7FFFD4] countdown-glow" style={{ fontFamily: "'Orbitron', sans-serif", fontWeight: 900 }} data-testid="countdown-minutes">
+              <span className="text-7xl md:text-9xl lg:text-[14rem] text-[#7FFFD4]" style={{ fontFamily: "'Orbitron', sans-serif", fontWeight: 900 }} data-testid="countdown-minutes">
                 {time.minutes}
               </span>
               <span className="text-6xl md:text-8xl lg:text-[12rem] text-[#7FFFD4]" style={{ fontFamily: "'Orbitron', sans-serif", fontWeight: 900 }}>:</span>
-              <span className="text-7xl md:text-9xl lg:text-[14rem] text-[#7FFFD4] countdown-glow" style={{ fontFamily: "'Orbitron', sans-serif", fontWeight: 900 }} data-testid="countdown-seconds">
+              <span className="text-7xl md:text-9xl lg:text-[14rem] text-[#7FFFD4]" style={{ fontFamily: "'Orbitron', sans-serif", fontWeight: 900 }} data-testid="countdown-seconds">
                 {time.secs}
               </span>
             </div>
