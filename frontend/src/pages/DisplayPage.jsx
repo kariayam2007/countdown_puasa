@@ -131,8 +131,8 @@ const DisplayPage = () => {
               <span 
                 className="text-7xl md:text-9xl lg:text-[14rem] text-transparent"
                 style={{ 
-                  fontFamily: "'Nunito', sans-serif", 
-                  fontWeight: 900,
+                  fontFamily: "'Agriculture', sans-serif", 
+                  fontWeight: 'bold',
                   WebkitTextStroke: '3px #7FFFD4'
                 }} 
                 data-testid="countdown-hours"
@@ -142,16 +142,16 @@ const DisplayPage = () => {
               <span 
                 className="text-6xl md:text-8xl lg:text-[12rem] text-transparent"
                 style={{ 
-                  fontFamily: "'Nunito', sans-serif", 
-                  fontWeight: 900,
+                  fontFamily: "'Agriculture', sans-serif", 
+                  fontWeight: 'bold',
                   WebkitTextStroke: '3px #7FFFD4'
                 }}
               >:</span>
               <span 
                 className="text-7xl md:text-9xl lg:text-[14rem] text-transparent"
                 style={{ 
-                  fontFamily: "'Nunito', sans-serif", 
-                  fontWeight: 900,
+                  fontFamily: "'Agriculture', sans-serif", 
+                  fontWeight: 'bold',
                   WebkitTextStroke: '3px #7FFFD4'
                 }} 
                 data-testid="countdown-minutes"
@@ -161,16 +161,16 @@ const DisplayPage = () => {
               <span 
                 className="text-6xl md:text-8xl lg:text-[12rem] text-transparent"
                 style={{ 
-                  fontFamily: "'Nunito', sans-serif", 
-                  fontWeight: 900,
+                  fontFamily: "'Agriculture', sans-serif", 
+                  fontWeight: 'bold',
                   WebkitTextStroke: '3px #7FFFD4'
                 }}
               >:</span>
               <span 
                 className="text-7xl md:text-9xl lg:text-[14rem] text-transparent"
                 style={{ 
-                  fontFamily: "'Nunito', sans-serif", 
-                  fontWeight: 900,
+                  fontFamily: "'Agriculture', sans-serif", 
+                  fontWeight: 'bold',
                   WebkitTextStroke: '3px #7FFFD4'
                 }} 
                 data-testid="countdown-seconds"
