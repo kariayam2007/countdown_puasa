@@ -42,7 +42,10 @@ import {
   Key,
   UserPlus,
   Upload,
-  FileVideo
+  FileVideo,
+  MapPin,
+  Sunrise,
+  Sunset
 } from "lucide-react";
 import { format } from "date-fns";
 
