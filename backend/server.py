@@ -548,10 +548,6 @@ async def get_display_state():
             current_tvc_videos=[TVCVideo(**v) for v in tvc_videos],
             berbuka_video=BerbukaVideo(**berbuka_video) if berbuka_video else None
         )
-            maghrib_time=maghrib_time_str,
-            current_tvc_videos=[TVCVideo(**v) for v in tvc_videos],
-            berbuka_video=BerbukaVideo(**berbuka_video) if berbuka_video else None
-        )
 
 # ============ ROOT ENDPOINT ============
 
