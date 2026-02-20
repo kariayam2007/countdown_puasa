@@ -1075,8 +1075,8 @@ const AdminPage = () => {
                   ))}
                   {schedules.length === 0 && (
                     <TableRow>
-                      <TableCell colSpan={4} className="text-center text-purple-400 py-8">
-                        Belum ada jadwal maghrib
+                      <TableCell colSpan={5} className="text-center text-purple-400 py-8">
+                        Belum ada jadwal waktu sholat
                       </TableCell>
                     </TableRow>
                   )}
