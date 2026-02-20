@@ -127,51 +127,51 @@ const DisplayPage = () => {
           
           {/* Countdown Content - ONLY NUMBERS */}
           <div className="absolute inset-0 flex items-center justify-center">
-            <div className="flex items-center justify-center gap-2 md:gap-4">
+            <div className="flex items-center justify-center gap-2 md:gap-6">
               <span 
-                className="text-7xl md:text-9xl lg:text-[14rem] text-transparent"
+                className="text-8xl md:text-[12rem] lg:text-[20rem] text-transparent"
                 style={{ 
                   fontFamily: "'Agriculture', sans-serif", 
                   fontWeight: 'bold',
-                  WebkitTextStroke: '3px #7FFFD4'
+                  WebkitTextStroke: '4px #7FFFD4'
                 }} 
                 data-testid="countdown-hours"
               >
                 {time.hours}
               </span>
               <span 
-                className="text-6xl md:text-8xl lg:text-[12rem] text-transparent"
+                className="text-7xl md:text-[10rem] lg:text-[18rem] text-transparent"
                 style={{ 
                   fontFamily: "'Agriculture', sans-serif", 
                   fontWeight: 'bold',
-                  WebkitTextStroke: '3px #7FFFD4'
+                  WebkitTextStroke: '4px #7FFFD4'
                 }}
               >:</span>
               <span 
-                className="text-7xl md:text-9xl lg:text-[14rem] text-transparent"
+                className="text-8xl md:text-[12rem] lg:text-[20rem] text-transparent"
                 style={{ 
                   fontFamily: "'Agriculture', sans-serif", 
                   fontWeight: 'bold',
-                  WebkitTextStroke: '3px #7FFFD4'
+                  WebkitTextStroke: '4px #7FFFD4'
                 }} 
                 data-testid="countdown-minutes"
               >
                 {time.minutes}
               </span>
               <span 
-                className="text-6xl md:text-8xl lg:text-[12rem] text-transparent"
+                className="text-7xl md:text-[10rem] lg:text-[18rem] text-transparent"
                 style={{ 
                   fontFamily: "'Agriculture', sans-serif", 
                   fontWeight: 'bold',
-                  WebkitTextStroke: '3px #7FFFD4'
+                  WebkitTextStroke: '4px #7FFFD4'
                 }}
               >:</span>
               <span 
-                className="text-7xl md:text-9xl lg:text-[14rem] text-transparent"
+                className="text-8xl md:text-[12rem] lg:text-[20rem] text-transparent"
                 style={{ 
                   fontFamily: "'Agriculture', sans-serif", 
                   fontWeight: 'bold',
-                  WebkitTextStroke: '3px #7FFFD4'
+                  WebkitTextStroke: '4px #7FFFD4'
                 }} 
                 data-testid="countdown-seconds"
               >
