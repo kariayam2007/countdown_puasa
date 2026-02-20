@@ -121,24 +121,32 @@ class MaghribSchedule(BaseModel):
     model_config = ConfigDict(extra="ignore")
     id: str = Field(default_factory=lambda: str(uuid.uuid4()))
     date: str  # Format: YYYY-MM-DD
-    maghrib_time: str  # Format: HH:MM
+    subuh_time: str  # Format: HH:MM - waktu mulai countdown
+    maghrib_time: str  # Format: HH:MM - waktu berbuka
     location: str = "Bekasi"
     created_at: str = Field(default_factory=lambda: datetime.now(timezone.utc).isoformat())
 
 class MaghribScheduleCreate(BaseModel):
     date: str
+    subuh_time: str
     maghrib_time: str
     location: str = "Bekasi"
 
 class MaghribScheduleUpdate(BaseModel):
     date: Optional[str] = None
+    subuh_time: Optional[str] = None
     maghrib_time: Optional[str] = None
     location: Optional[str] = None
 
+class LocationSettings(BaseModel):
+    location: str = "Bekasi"
+
 class DisplayState(BaseModel):
-    state: str  # "tvc", "countdown", "berbuka"
+    state: str  # "countdown", "berbuka", "tvc"
     countdown_seconds: Optional[int] = None
+    subuh_time: Optional[str] = None
     maghrib_time: Optional[str] = None
+    location: Optional[str] = None
     current_tvc_videos: List[TVCVideo] = []
     berbuka_video: Optional[BerbukaVideo] = None
     berbuka_end_time: Optional[str] = None
