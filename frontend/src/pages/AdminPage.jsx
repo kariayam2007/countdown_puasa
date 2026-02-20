@@ -102,7 +102,7 @@ const AdminPage = () => {
   // Form states
   const [newTvc, setNewTvc] = useState({ name: "", url: "", order: 0 });
   const [newBerbuka, setNewBerbuka] = useState({ name: "", url: "", duration_seconds: 300 });
-  const [newSchedule, setNewSchedule] = useState({ date: "", maghrib_time: "" });
+  const [newSchedule, setNewSchedule] = useState({ date: "", subuh_time: "04:30", maghrib_time: "", location: "Bekasi" });
   const [selectedDate, setSelectedDate] = useState(null);
   const [editingTvc, setEditingTvc] = useState(null);
   const [editingBerbuka, setEditingBerbuka] = useState(null);
