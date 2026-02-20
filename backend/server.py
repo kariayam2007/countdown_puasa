@@ -128,7 +128,7 @@ class MaghribSchedule(BaseModel):
 
 class MaghribScheduleCreate(BaseModel):
     date: str
-    subuh_time: str
+    subuh_time: Optional[str] = "04:30"
     maghrib_time: str
     location: str = "Bekasi"
 
