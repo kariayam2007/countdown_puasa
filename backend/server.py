@@ -462,11 +462,16 @@ async def create_bulk_schedules(schedules: List[MaghribScheduleCreate], username
 
 @api_router.get("/display-state", response_model=DisplayState)
 async def get_display_state():
+    """
+    Flow baru:
+    1. Subuh -> Maghrib: Countdown saja (tanpa video)
+    2. Maghrib -> (Maghrib + durasi berbuka): Video Berbuka saja (tanpa tulisan)
+    3. Setelah Berbuka selesai: Video TVC looping
+    """
     now = datetime.now(JAKARTA_TZ)
     today_str = now.strftime("%Y-%m-%d")
-    current_time = now.strftime("%H:%M")
     
-    # Get today's maghrib schedule
+    # Get today's schedule
     schedule = await db.maghrib_schedules.find_one({"date": today_str}, {"_id": 0})
     
     # Get active TVC videos
@@ -483,51 +488,66 @@ async def get_display_state():
             berbuka_video=BerbukaVideo(**berbuka_video) if berbuka_video else None
         )
     
+    location = schedule.get("location", "Bekasi")
+    subuh_time_str = schedule.get("subuh_time", "04:30")
     maghrib_time_str = schedule["maghrib_time"]
+    
+    # Parse times
+    subuh_hour, subuh_minute = map(int, subuh_time_str.split(":"))
     maghrib_hour, maghrib_minute = map(int, maghrib_time_str.split(":"))
     
-    # Create maghrib datetime for today
+    # Create datetime objects for today
+    subuh_dt = now.replace(hour=subuh_hour, minute=subuh_minute, second=0, microsecond=0)
     maghrib_dt = now.replace(hour=maghrib_hour, minute=maghrib_minute, second=0, microsecond=0)
     
-    # Calculate countdown start time (120 minutes before maghrib)
-    countdown_start = maghrib_dt - timedelta(minutes=120)
-    
-    # Calculate berbuka end time (5 minutes after maghrib by default, or use video duration)
+    # Calculate berbuka end time based on video duration
     berbuka_duration = berbuka_video.get("duration_seconds", 300) if berbuka_video else 300
     berbuka_end = maghrib_dt + timedelta(seconds=berbuka_duration)
     
-    # Determine current state
-    if now < countdown_start:
-        # Before countdown starts - show TVC
+    # Determine current state based on new flow
+    if now < subuh_dt:
+        # Before subuh - show TVC
         return DisplayState(
             state="tvc",
+            subuh_time=subuh_time_str,
             maghrib_time=maghrib_time_str,
+            location=location,
             current_tvc_videos=[TVCVideo(**v) for v in tvc_videos],
             berbuka_video=BerbukaVideo(**berbuka_video) if berbuka_video else None
         )
     elif now < maghrib_dt:
-        # During countdown period
+        # From Subuh to Maghrib - show COUNTDOWN only (no video)
         seconds_remaining = int((maghrib_dt - now).total_seconds())
         return DisplayState(
             state="countdown",
             countdown_seconds=seconds_remaining,
+            subuh_time=subuh_time_str,
             maghrib_time=maghrib_time_str,
+            location=location,
             current_tvc_videos=[TVCVideo(**v) for v in tvc_videos],
             berbuka_video=BerbukaVideo(**berbuka_video) if berbuka_video else None
         )
     elif now < berbuka_end:
-        # During berbuka video period
+        # From Maghrib to berbuka_end - show BERBUKA VIDEO only (no text)
         return DisplayState(
             state="berbuka",
+            subuh_time=subuh_time_str,
             maghrib_time=maghrib_time_str,
+            location=location,
             current_tvc_videos=[TVCVideo(**v) for v in tvc_videos],
             berbuka_video=BerbukaVideo(**berbuka_video) if berbuka_video else None,
             berbuka_end_time=berbuka_end.isoformat()
         )
     else:
-        # After berbuka - back to TVC
+        # After berbuka ends - show TVC videos
         return DisplayState(
             state="tvc",
+            subuh_time=subuh_time_str,
+            maghrib_time=maghrib_time_str,
+            location=location,
+            current_tvc_videos=[TVCVideo(**v) for v in tvc_videos],
+            berbuka_video=BerbukaVideo(**berbuka_video) if berbuka_video else None
+        )
             maghrib_time=maghrib_time_str,
             current_tvc_videos=[TVCVideo(**v) for v in tvc_videos],
             berbuka_video=BerbukaVideo(**berbuka_video) if berbuka_video else None
