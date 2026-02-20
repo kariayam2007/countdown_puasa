@@ -1043,6 +1043,14 @@ const AdminPage = () => {
                                   className="bg-frestea-dark border-frestea-purple/30"
                                 />
                               </div>
+                              <div>
+                                <Label className="text-purple-300">Wilayah</Label>
+                                <Input
+                                  value={editingSchedule?.location || ""}
+                                  onChange={(e) => setEditingSchedule(prev => ({ ...prev, location: e.target.value }))}
+                                  className="bg-frestea-dark border-frestea-purple/30"
+                                />
+                              </div>
                             </div>
                             <DialogFooter>
                               <DialogClose asChild>
