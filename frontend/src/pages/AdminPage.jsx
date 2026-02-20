@@ -906,15 +906,15 @@ const AdminPage = () => {
             <CardHeader>
               <CardTitle className="text-white flex items-center gap-2">
                 <CalendarDays className="w-5 h-5 text-frestea-gold" />
-                Jadwal Maghrib
+                Jadwal Waktu Sholat
               </CardTitle>
               <CardDescription className="text-purple-300">
-                Kelola jadwal waktu maghrib untuk countdown
+                Kelola jadwal waktu subuh dan maghrib untuk countdown
               </CardDescription>
             </CardHeader>
             <CardContent className="space-y-6">
               {/* Add Schedule Form */}
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-4 p-4 bg-frestea-dark/50 rounded-lg">
+              <div className="grid grid-cols-1 md:grid-cols-6 gap-4 p-4 bg-frestea-dark/50 rounded-lg">
                 <div>
                   <Label className="text-purple-300">Tanggal</Label>
                   <Popover>
@@ -925,7 +925,7 @@ const AdminPage = () => {
                         data-testid="schedule-date-picker"
                       >
                         <CalendarDays className="mr-2 h-4 w-4" />
-                        {selectedDate ? format(selectedDate, "PPP") : "Pilih tanggal"}
+                        {selectedDate ? format(selectedDate, "dd/MM/yy") : "Pilih"}
                       </Button>
                     </PopoverTrigger>
                     <PopoverContent className="w-auto p-0 bg-frestea-surface border-frestea-purple/30">
@@ -939,20 +939,42 @@ const AdminPage = () => {
                   </Popover>
                 </div>
                 <div>
-                  <Label className="text-purple-300">Waktu Maghrib (HH:MM)</Label>
-                  <div className="flex items-center gap-2">
-                    <Clock className="w-4 h-4 text-purple-400" />
-                    <Input
-                      type="time"
-                      placeholder="18:15"
-                      value={newSchedule.maghrib_time}
-                      onChange={(e) => setNewSchedule(prev => ({ ...prev, maghrib_time: e.target.value }))}
-                      className="bg-frestea-surface border-frestea-purple/30"
-                      data-testid="schedule-time-input"
-                    />
-                  </div>
+                  <Label className="text-purple-300 flex items-center gap-1">
+                    <Sunrise className="w-3 h-3" /> Subuh
+                  </Label>
+                  <Input
+                    type="time"
+                    value={newSchedule.subuh_time}
+                    onChange={(e) => setNewSchedule(prev => ({ ...prev, subuh_time: e.target.value }))}
+                    className="bg-frestea-surface border-frestea-purple/30"
+                    data-testid="schedule-subuh-input"
+                  />
                 </div>
-                <div className="flex items-end">
+                <div>
+                  <Label className="text-purple-300 flex items-center gap-1">
+                    <Sunset className="w-3 h-3" /> Maghrib
+                  </Label>
+                  <Input
+                    type="time"
+                    value={newSchedule.maghrib_time}
+                    onChange={(e) => setNewSchedule(prev => ({ ...prev, maghrib_time: e.target.value }))}
+                    className="bg-frestea-surface border-frestea-purple/30"
+                    data-testid="schedule-maghrib-input"
+                  />
+                </div>
+                <div>
+                  <Label className="text-purple-300 flex items-center gap-1">
+                    <MapPin className="w-3 h-3" /> Wilayah
+                  </Label>
+                  <Input
+                    placeholder="Bekasi"
+                    value={newSchedule.location}
+                    onChange={(e) => setNewSchedule(prev => ({ ...prev, location: e.target.value }))}
+                    className="bg-frestea-surface border-frestea-purple/30"
+                    data-testid="schedule-location-input"
+                  />
+                </div>
+                <div className="md:col-span-2 flex items-end">
                   <Button onClick={handleAddSchedule} className="w-full bg-frestea-gold text-black hover:bg-frestea-gold/80" data-testid="add-schedule-btn">
                     <Plus className="w-4 h-4 mr-2" />
                     Tambah Jadwal
@@ -965,8 +987,9 @@ const AdminPage = () => {
                 <TableHeader>
                   <TableRow className="border-frestea-purple/30">
                     <TableHead className="text-purple-300">Tanggal</TableHead>
-                    <TableHead className="text-purple-300">Waktu Maghrib</TableHead>
-                    <TableHead className="text-purple-300">Lokasi</TableHead>
+                    <TableHead className="text-purple-300">Subuh</TableHead>
+                    <TableHead className="text-purple-300">Maghrib</TableHead>
+                    <TableHead className="text-purple-300">Wilayah</TableHead>
                     <TableHead className="text-purple-300 text-right">Aksi</TableHead>
                   </TableRow>
                 </TableHeader>
@@ -974,6 +997,7 @@ const AdminPage = () => {
                   {schedules.map((schedule) => (
                     <TableRow key={schedule.id} className="border-frestea-purple/30">
                       <TableCell className="text-white">{schedule.date}</TableCell>
+                      <TableCell className="text-purple-300 font-mono">{schedule.subuh_time || "-"}</TableCell>
                       <TableCell className="text-frestea-gold font-mono">{schedule.maghrib_time}</TableCell>
                       <TableCell className="text-purple-300">{schedule.location}</TableCell>
                       <TableCell className="text-right space-x-2">
@@ -998,6 +1022,15 @@ const AdminPage = () => {
                                 <Input
                                   value={editingSchedule?.date || ""}
                                   onChange={(e) => setEditingSchedule(prev => ({ ...prev, date: e.target.value }))}
+                                  className="bg-frestea-dark border-frestea-purple/30"
+                                />
+                              </div>
+                              <div>
+                                <Label className="text-purple-300">Waktu Subuh</Label>
+                                <Input
+                                  type="time"
+                                  value={editingSchedule?.subuh_time || ""}
+                                  onChange={(e) => setEditingSchedule(prev => ({ ...prev, subuh_time: e.target.value }))}
                                   className="bg-frestea-dark border-frestea-purple/30"
                                 />
                               </div>
