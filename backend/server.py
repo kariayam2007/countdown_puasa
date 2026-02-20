@@ -121,7 +121,7 @@ class MaghribSchedule(BaseModel):
     model_config = ConfigDict(extra="ignore")
     id: str = Field(default_factory=lambda: str(uuid.uuid4()))
     date: str  # Format: YYYY-MM-DD
-    subuh_time: str  # Format: HH:MM - waktu mulai countdown
+    subuh_time: Optional[str] = "04:30"  # Format: HH:MM - waktu mulai countdown
     maghrib_time: str  # Format: HH:MM - waktu berbuka
     location: str = "Bekasi"
     created_at: str = Field(default_factory=lambda: datetime.now(timezone.utc).isoformat())
