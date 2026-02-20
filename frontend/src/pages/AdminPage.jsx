@@ -342,14 +342,14 @@ const AdminPage = () => {
 
   // Schedule handlers
   const handleAddSchedule = async () => {
-    if (!newSchedule.date || !newSchedule.maghrib_time) {
-      toast.error("Tanggal dan waktu maghrib harus diisi");
+    if (!newSchedule.date || !newSchedule.subuh_time || !newSchedule.maghrib_time) {
+      toast.error("Tanggal, waktu subuh, dan waktu maghrib harus diisi");
       return;
     }
     try {
       await axios.post(`${API}/schedules`, newSchedule, { headers: getAuthHeader() });
       toast.success("Jadwal berhasil ditambahkan");
-      setNewSchedule({ date: "", maghrib_time: "" });
+      setNewSchedule({ date: "", subuh_time: "04:30", maghrib_time: "", location: "Bekasi" });
       setSelectedDate(null);
       fetchData();
     } catch (error) {
