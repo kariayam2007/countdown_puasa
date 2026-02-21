@@ -5,11 +5,12 @@ Website countdown Ramadan dengan flow:
 - TVC looping => 120 menit sebelum maghrib countdown => countdown habis video berbuka (5 menit) => balik TVC
 
 ## User Personas
-1. **Admin/Operator** - Mengelola video TVC, video berbuka, dan jadwal maghrib
+1. **Admin/Operator** - Mengelola video TVC, video berbuka, video countdown, dan jadwal maghrib
 2. **Viewer** - Melihat tampilan countdown pada display
 
 ## Core Requirements
 - Video TVC: list yang bisa ditambah/dikurangi dari database
+- Video Countdown: video looping selama sesi countdown dengan durasi yang bisa di-setting
 - Admin panel untuk input jadwal manual maghrib
 - Halaman admin untuk mengelola video dan jadwal
 - Single location (Bekasi)
@@ -20,26 +21,28 @@ Website countdown Ramadan dengan flow:
 ### Backend (FastAPI + MongoDB)
 - `/api/tvc-videos` - CRUD untuk video TVC
 - `/api/berbuka-videos` - CRUD untuk video berbuka
+- `/api/countdown-videos` - CRUD untuk video countdown
 - `/api/schedules` - CRUD untuk jadwal maghrib
-- `/api/display-state` - Logic state: TVC/countdown/berbuka
+- `/api/display-state` - Logic state: TVC/countdown/berbuka (includes countdown_video)
 - `/api/auth/login` - JWT authentication
 - `/api/users` - User management (create, change password, reset password)
 - `/api/videos/upload` - Video file upload
 
 ### Frontend (React)
 - Display Page (`/`) - Tampilan video/countdown dengan font Agriculture kustom
-- Admin Page (`/admin`) - Tabs: Video TVC, Video Berbuka, Jadwal Maghrib, User Management
+- Admin Page (`/admin`) - Tabs: Video TVC, Video Berbuka, Jadwal Maghrib, Video Countdown, User Management
 - Login Page (`/login`) - JWT authentication
 
 ### Flow Logic (Updated)
-1. **Subuh - Maghrib**: Tampilkan countdown only (background ungu, tanpa video)
+1. **Subuh - Maghrib**: Tampilkan countdown dengan video background looping (jika di-setting)
 2. **Waktu Maghrib**: Tampilkan video berbuka looping selama durasi yang ditentukan
 3. **Setelah Berbuka**: Tampilkan TVC looping
 
 ### UI Customization
 - Font countdown: **Agriculture** (custom font dengan outline/stroke effect)
-- Background countdown: Ungu (#5B4B9E)
+- Background countdown: Video looping atau ungu (#5B4B9E) jika tidak ada video
 - Text effect: Aquamarine outline (#7FFFD4)
+- Fixed position countdown: Posisi jam, menit, detik tidak bergerak saat berubah
 
 ## Completed Tasks (Feb 2026)
 - ✅ Core countdown logic
@@ -49,6 +52,8 @@ Website countdown Ramadan dengan flow:
 - ✅ User Management
 - ✅ Video Upload Feature
 - ✅ Custom Agriculture Font Implementation
+- ✅ Fixed position countdown timer
+- ✅ Video Countdown dengan durasi yang bisa di-setting
 - ✅ Deployment guides (VPS & cPanel)
 
 ## Prioritized Backlog
