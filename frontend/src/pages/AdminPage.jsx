@@ -1190,6 +1190,190 @@ const AdminPage = () => {
           </Card>
         </TabsContent>
 
+        {/* Countdown Videos Tab */}
+        <TabsContent value="countdown">
+          <Card className="admin-card">
+            <CardHeader>
+              <CardTitle className="text-white flex items-center gap-2">
+                <Clock className="w-5 h-5 text-orange-500" />
+                Video Countdown
+              </CardTitle>
+              <CardDescription className="text-purple-300">
+                Video yang akan diputar selama sesi countdown (dari Subuh sampai Maghrib)
+              </CardDescription>
+            </CardHeader>
+            <CardContent className="space-y-6">
+              {/* Add Countdown Video Form */}
+              <div className="grid grid-cols-1 md:grid-cols-5 gap-4 p-4 bg-frestea-dark/50 rounded-lg">
+                <div>
+                  <Label className="text-purple-300">Nama Video</Label>
+                  <Input
+                    placeholder="Video Countdown 1"
+                    value={newCountdown.name}
+                    onChange={(e) => setNewCountdown(prev => ({ ...prev, name: e.target.value }))}
+                    className="bg-frestea-surface border-frestea-purple/30"
+                    data-testid="countdown-name-input"
+                  />
+                </div>
+                <div>
+                  <Label className="text-purple-300">URL Video</Label>
+                  <Input
+                    placeholder="https://example.com/video.mp4"
+                    value={newCountdown.url}
+                    onChange={(e) => setNewCountdown(prev => ({ ...prev, url: e.target.value }))}
+                    className="bg-frestea-surface border-frestea-purple/30"
+                    data-testid="countdown-url-input"
+                  />
+                </div>
+                <div>
+                  <Label className="text-purple-300">Durasi Loop (menit)</Label>
+                  <Input
+                    type="number"
+                    placeholder="5"
+                    value={newCountdown.duration_minutes}
+                    onChange={(e) => setNewCountdown(prev => ({ ...prev, duration_minutes: parseInt(e.target.value) || 5 }))}
+                    className="bg-frestea-surface border-frestea-purple/30"
+                    data-testid="countdown-duration-input"
+                  />
+                </div>
+                <div>
+                  <Label className="text-purple-300">Upload Video</Label>
+                  <div className="relative">
+                    <input
+                      type="file"
+                      accept="video/mp4,video/webm,video/ogg"
+                      onChange={handleUploadCountdown}
+                      className="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
+                      disabled={uploadingCountdown}
+                      data-testid="countdown-upload-input"
+                    />
+                    <Button 
+                      variant="outline" 
+                      className="w-full border-dashed border-orange-500/50"
+                      disabled={uploadingCountdown}
+                    >
+                      {uploadingCountdown ? (
+                        <RefreshCw className="w-4 h-4 mr-2 animate-spin" />
+                      ) : (
+                        <Upload className="w-4 h-4 mr-2" />
+                      )}
+                      {uploadingCountdown ? "Uploading..." : "Upload"}
+                    </Button>
+                  </div>
+                </div>
+                <div className="flex items-end">
+                  <Button onClick={handleAddCountdown} className="w-full bg-orange-500 hover:bg-orange-600" data-testid="add-countdown-btn">
+                    <Plus className="w-4 h-4 mr-2" />
+                    Tambah
+                  </Button>
+                </div>
+              </div>
+
+              {/* Countdown Videos Table */}
+              <Table>
+                <TableHeader>
+                  <TableRow className="border-frestea-purple/30">
+                    <TableHead className="text-purple-300">Nama</TableHead>
+                    <TableHead className="text-purple-300">URL</TableHead>
+                    <TableHead className="text-purple-300">Durasi Loop</TableHead>
+                    <TableHead className="text-purple-300">Status</TableHead>
+                    <TableHead className="text-right text-purple-300">Aksi</TableHead>
+                  </TableRow>
+                </TableHeader>
+                <TableBody>
+                  {countdownVideos.map((video) => (
+                    <TableRow key={video.id} className="border-frestea-purple/30">
+                      <TableCell className="text-white font-medium">{video.name}</TableCell>
+                      <TableCell className="text-purple-300 max-w-xs truncate">
+                        <a href={video.url} target="_blank" rel="noopener noreferrer" className="hover:text-orange-400">
+                          {video.url}
+                        </a>
+                      </TableCell>
+                      <TableCell className="text-orange-400">{video.duration_minutes} menit</TableCell>
+                      <TableCell>
+                        <Switch
+                          checked={video.is_active}
+                          onCheckedChange={() => handleToggleCountdown(video)}
+                          data-testid={`toggle-countdown-${video.id}`}
+                        />
+                      </TableCell>
+                      <TableCell className="text-right space-x-2">
+                        <Dialog>
+                          <DialogTrigger asChild>
+                            <Button 
+                              variant="ghost" 
+                              size="icon"
+                              onClick={() => setEditingCountdown(video)}
+                              data-testid={`edit-countdown-${video.id}`}
+                            >
+                              <Edit className="w-4 h-4 text-purple-400" />
+                            </Button>
+                          </DialogTrigger>
+                          <DialogContent className="bg-frestea-surface border-frestea-purple/30">
+                            <DialogHeader>
+                              <DialogTitle className="text-white">Edit Video Countdown</DialogTitle>
+                            </DialogHeader>
+                            <div className="space-y-4">
+                              <div>
+                                <Label className="text-purple-300">Nama</Label>
+                                <Input
+                                  value={editingCountdown?.name || ""}
+                                  onChange={(e) => setEditingCountdown(prev => ({ ...prev, name: e.target.value }))}
+                                  className="bg-frestea-dark border-frestea-purple/30"
+                                />
+                              </div>
+                              <div>
+                                <Label className="text-purple-300">URL</Label>
+                                <Input
+                                  value={editingCountdown?.url || ""}
+                                  onChange={(e) => setEditingCountdown(prev => ({ ...prev, url: e.target.value }))}
+                                  className="bg-frestea-dark border-frestea-purple/30"
+                                />
+                              </div>
+                              <div>
+                                <Label className="text-purple-300">Durasi Loop (menit)</Label>
+                                <Input
+                                  type="number"
+                                  value={editingCountdown?.duration_minutes || 5}
+                                  onChange={(e) => setEditingCountdown(prev => ({ ...prev, duration_minutes: parseInt(e.target.value) }))}
+                                  className="bg-frestea-dark border-frestea-purple/30"
+                                />
+                              </div>
+                            </div>
+                            <DialogFooter>
+                              <DialogClose asChild>
+                                <Button variant="ghost">Batal</Button>
+                              </DialogClose>
+                              <DialogClose asChild>
+                                <Button onClick={handleUpdateCountdown} className="bg-orange-500 text-white">Simpan</Button>
+                              </DialogClose>
+                            </DialogFooter>
+                          </DialogContent>
+                        </Dialog>
+                        <Button 
+                          variant="ghost" 
+                          size="icon"
+                          onClick={() => handleDeleteCountdown(video.id)}
+                          data-testid={`delete-countdown-${video.id}`}
+                        >
+                          <Trash2 className="w-4 h-4 text-red-400" />
+                        </Button>
+                      </TableCell>
+                    </TableRow>
+                  ))}
+                  {countdownVideos.length === 0 && (
+                    <TableRow>
+                      <TableCell colSpan={5} className="text-center text-purple-400 py-8">
+                        Belum ada video countdown
+                      </TableCell>
+                    </TableRow>
+                  )}
+                </TableBody>
+              </Table>
+            </CardContent>
+          </Card>
+        </TabsContent>
+
         {/* Users Tab */}
         <TabsContent value="users">
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
