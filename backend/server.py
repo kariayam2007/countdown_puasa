@@ -573,8 +573,12 @@ async def get_display_state():
             berbuka_video=BerbukaVideo(**berbuka_video) if berbuka_video else None
         )
     elif now < maghrib_dt:
-        # From Subuh to Maghrib - show COUNTDOWN only (no video)
+        # From Subuh to Maghrib - show COUNTDOWN with optional video
         seconds_remaining = int((maghrib_dt - now).total_seconds())
+        
+        # Get active countdown video
+        countdown_video = await db.countdown_videos.find_one({"is_active": True}, {"_id": 0})
+        
         return DisplayState(
             state="countdown",
             countdown_seconds=seconds_remaining,
@@ -582,7 +586,8 @@ async def get_display_state():
             maghrib_time=maghrib_time_str,
             location=location,
             current_tvc_videos=[TVCVideo(**v) for v in tvc_videos],
-            berbuka_video=BerbukaVideo(**berbuka_video) if berbuka_video else None
+            berbuka_video=BerbukaVideo(**berbuka_video) if berbuka_video else None,
+            countdown_video=CountdownVideo(**countdown_video) if countdown_video else None
         )
     elif now < berbuka_end:
         # From Maghrib to berbuka_end - show BERBUKA VIDEO only (no text)
