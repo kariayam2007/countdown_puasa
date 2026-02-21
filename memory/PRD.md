@@ -10,7 +10,7 @@ Website countdown Ramadan dengan flow:
 
 ## Core Requirements
 - Video TVC: list yang bisa ditambah/dikurangi dari database
-- Video Countdown: video looping selama sesi countdown dengan durasi yang bisa di-setting
+- Video Countdown: video yang diputar secara berkala selama sesi countdown dengan interval yang bisa di-setting
 - Admin panel untuk input jadwal manual maghrib
 - Halaman admin untuk mengelola video dan jadwal
 - Single location (Bekasi)
@@ -21,9 +21,9 @@ Website countdown Ramadan dengan flow:
 ### Backend (FastAPI + MongoDB)
 - `/api/tvc-videos` - CRUD untuk video TVC
 - `/api/berbuka-videos` - CRUD untuk video berbuka
-- `/api/countdown-videos` - CRUD untuk video countdown
+- `/api/countdown-videos` - CRUD untuk video countdown (dengan duration_minutes sebagai interval)
 - `/api/schedules` - CRUD untuk jadwal maghrib
-- `/api/display-state` - Logic state: TVC/countdown/berbuka (includes countdown_video)
+- `/api/display-state` - Logic state: TVC/countdown/berbuka
 - `/api/auth/login` - JWT authentication
 - `/api/users` - User management (create, change password, reset password)
 - `/api/videos/upload` - Video file upload
@@ -33,14 +33,18 @@ Website countdown Ramadan dengan flow:
 - Admin Page (`/admin`) - Tabs: Video TVC, Video Berbuka, Jadwal Maghrib, Video Countdown, User Management
 - Login Page (`/login`) - JWT authentication
 
-### Flow Logic (Updated)
-1. **Subuh - Maghrib**: Tampilkan countdown dengan video background looping (jika di-setting)
+### Flow Logic (Final)
+1. **Subuh - Maghrib (Countdown State)**:
+   - Tampilkan countdown timer saja (background ungu)
+   - Setelah X menit (interval dari backend), putar video countdown
+   - Setelah video selesai, kembali ke countdown timer
+   - Siklus berulang sampai waktu maghrib
 2. **Waktu Maghrib**: Tampilkan video berbuka looping selama durasi yang ditentukan
 3. **Setelah Berbuka**: Tampilkan TVC looping
 
 ### UI Customization
 - Font countdown: **Agriculture** (custom font dengan outline/stroke effect)
-- Background countdown: Video looping atau ungu (#5B4B9E) jika tidak ada video
+- Background countdown: Ungu (#5B4B9E) saat timer, video saat interval
 - Text effect: Aquamarine outline (#7FFFD4)
 - Fixed position countdown: Posisi jam, menit, detik tidak bergerak saat berubah
 
@@ -53,7 +57,7 @@ Website countdown Ramadan dengan flow:
 - ✅ Video Upload Feature
 - ✅ Custom Agriculture Font Implementation
 - ✅ Fixed position countdown timer
-- ✅ Video Countdown dengan durasi yang bisa di-setting
+- ✅ Video Countdown dengan interval yang bisa di-setting
 - ✅ Deployment guides (VPS & cPanel)
 
 ## Prioritized Backlog
