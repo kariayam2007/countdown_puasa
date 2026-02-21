@@ -148,74 +148,105 @@ const DisplayPage = () => {
     <div data-testid="display-page" className="relative w-screen h-screen overflow-hidden bg-frestea-dark">
       
       {/* ============ STATE: COUNTDOWN ============ */}
-      {/* Dari Subuh sampai Maghrib - Hanya countdown timer, tanpa video background */}
+      {/* Dari Subuh sampai Maghrib - Countdown timer, dengan video interval */}
       {displayState?.state === "countdown" && (
         <div className="absolute inset-0 z-0">
-          {/* Background solid purple - tanpa video */}
-          <div 
-            className="w-full h-full"
-            style={{ backgroundColor: "#5B4B9E" }}
-          />
-          
-          {/* Countdown Content - ONLY NUMBERS */}
-          <div className="absolute inset-0 flex items-center justify-center">
-            <div className="flex items-center justify-center">
-              <span 
-                className="text-8xl md:text-[12rem] lg:text-[20rem] text-transparent inline-block text-center"
-                style={{ 
-                  fontFamily: "'Agriculture', sans-serif", 
-                  fontWeight: 'bold',
-                  WebkitTextStroke: '4px #7FFFD4',
-                  width: '1.2em'
-                }} 
-                data-testid="countdown-hours"
+          {/* Tampilkan video countdown jika waktunya */}
+          {showCountdownVideo && displayState?.countdown_video?.url ? (
+            <>
+              <video
+                ref={videoRef}
+                key="countdown-video"
+                src={displayState.countdown_video.url}
+                className="w-full h-full object-cover"
+                autoPlay
+                muted={isMuted}
+                playsInline
+                onEnded={handleCountdownVideoEnded}
+                data-testid="countdown-video-player"
+              />
+              {/* Sound Toggle untuk countdown video */}
+              <button
+                onClick={toggleMute}
+                className="absolute top-8 right-8 p-3 rounded-full bg-black/50 hover:bg-black/70 transition-colors z-10"
+                data-testid="countdown-sound-toggle-btn"
               >
-                {time.hours}
-              </span>
-              <span 
-                className="text-7xl md:text-[10rem] lg:text-[18rem] text-transparent inline-block text-center"
-                style={{ 
-                  fontFamily: "'Agriculture', sans-serif", 
-                  fontWeight: 'bold',
-                  WebkitTextStroke: '4px #7FFFD4',
-                  width: '0.5em'
-                }}
-              >:</span>
-              <span 
-                className="text-8xl md:text-[12rem] lg:text-[20rem] text-transparent inline-block text-center"
-                style={{ 
-                  fontFamily: "'Agriculture', sans-serif", 
-                  fontWeight: 'bold',
-                  WebkitTextStroke: '4px #7FFFD4',
-                  width: '1.2em'
-                }} 
-                data-testid="countdown-minutes"
-              >
-                {time.minutes}
-              </span>
-              <span 
-                className="text-7xl md:text-[10rem] lg:text-[18rem] text-transparent inline-block text-center"
-                style={{ 
-                  fontFamily: "'Agriculture', sans-serif", 
-                  fontWeight: 'bold',
-                  WebkitTextStroke: '4px #7FFFD4',
-                  width: '0.5em'
-                }}
-              >:</span>
-              <span 
-                className="text-8xl md:text-[12rem] lg:text-[20rem] text-transparent inline-block text-center"
-                style={{ 
-                  fontFamily: "'Agriculture', sans-serif", 
-                  fontWeight: 'bold',
-                  WebkitTextStroke: '4px #7FFFD4',
-                  width: '1.2em'
-                }} 
-                data-testid="countdown-seconds"
-              >
-                {time.secs}
-              </span>
-            </div>
-          </div>
+                {isMuted ? (
+                  <VolumeX className="w-6 h-6 text-white" />
+                ) : (
+                  <Volume2 className="w-6 h-6 text-frestea-green" />
+                )}
+              </button>
+            </>
+          ) : (
+            <>
+              {/* Background solid purple - tanpa video */}
+              <div 
+                className="w-full h-full"
+                style={{ backgroundColor: "#5B4B9E" }}
+              />
+              
+              {/* Countdown Content - ONLY NUMBERS */}
+              <div className="absolute inset-0 flex items-center justify-center">
+                <div className="flex items-center justify-center">
+                  <span 
+                    className="text-8xl md:text-[12rem] lg:text-[20rem] text-transparent inline-block text-center"
+                    style={{ 
+                      fontFamily: "'Agriculture', sans-serif", 
+                      fontWeight: 'bold',
+                      WebkitTextStroke: '4px #7FFFD4',
+                      width: '1.2em'
+                    }} 
+                    data-testid="countdown-hours"
+                  >
+                    {time.hours}
+                  </span>
+                  <span 
+                    className="text-7xl md:text-[10rem] lg:text-[18rem] text-transparent inline-block text-center"
+                    style={{ 
+                      fontFamily: "'Agriculture', sans-serif", 
+                      fontWeight: 'bold',
+                      WebkitTextStroke: '4px #7FFFD4',
+                      width: '0.5em'
+                    }}
+                  >:</span>
+                  <span 
+                    className="text-8xl md:text-[12rem] lg:text-[20rem] text-transparent inline-block text-center"
+                    style={{ 
+                      fontFamily: "'Agriculture', sans-serif", 
+                      fontWeight: 'bold',
+                      WebkitTextStroke: '4px #7FFFD4',
+                      width: '1.2em'
+                    }} 
+                    data-testid="countdown-minutes"
+                  >
+                    {time.minutes}
+                  </span>
+                  <span 
+                    className="text-7xl md:text-[10rem] lg:text-[18rem] text-transparent inline-block text-center"
+                    style={{ 
+                      fontFamily: "'Agriculture', sans-serif", 
+                      fontWeight: 'bold',
+                      WebkitTextStroke: '4px #7FFFD4',
+                      width: '0.5em'
+                    }}
+                  >:</span>
+                  <span 
+                    className="text-8xl md:text-[12rem] lg:text-[20rem] text-transparent inline-block text-center"
+                    style={{ 
+                      fontFamily: "'Agriculture', sans-serif", 
+                      fontWeight: 'bold',
+                      WebkitTextStroke: '4px #7FFFD4',
+                      width: '1.2em'
+                    }} 
+                    data-testid="countdown-seconds"
+                  >
+                    {time.secs}
+                  </span>
+                </div>
+              </div>
+            </>
+          )}
         </div>
       )}
 
