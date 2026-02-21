@@ -117,6 +117,28 @@ class BerbukaVideoUpdate(BaseModel):
     duration_seconds: Optional[int] = None
     is_active: Optional[bool] = None
 
+# Countdown Video Model
+class CountdownVideo(BaseModel):
+    model_config = ConfigDict(extra="ignore")
+    id: str = Field(default_factory=lambda: str(uuid.uuid4()))
+    name: str
+    url: str
+    duration_minutes: int = 5  # Duration in minutes for video looping
+    is_active: bool = True
+    created_at: str = Field(default_factory=lambda: datetime.now(timezone.utc).isoformat())
+
+class CountdownVideoCreate(BaseModel):
+    name: str
+    url: str
+    duration_minutes: int = 5
+    is_active: bool = True
+
+class CountdownVideoUpdate(BaseModel):
+    name: Optional[str] = None
+    url: Optional[str] = None
+    duration_minutes: Optional[int] = None
+    is_active: Optional[bool] = None
+
 class MaghribSchedule(BaseModel):
     model_config = ConfigDict(extra="ignore")
     id: str = Field(default_factory=lambda: str(uuid.uuid4()))
@@ -150,6 +172,7 @@ class DisplayState(BaseModel):
     current_tvc_videos: List[TVCVideo] = []
     berbuka_video: Optional[BerbukaVideo] = None
     berbuka_end_time: Optional[str] = None
+    countdown_video: Optional[CountdownVideo] = None
 
 # ============ AUTH HELPERS ============
 
