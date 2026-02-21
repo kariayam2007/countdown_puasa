@@ -116,31 +116,16 @@ const DisplayPage = () => {
     <div data-testid="display-page" className="relative w-screen h-screen overflow-hidden bg-frestea-dark">
       
       {/* ============ STATE: COUNTDOWN ============ */}
-      {/* Dari Subuh sampai Maghrib - Countdown dengan video background jika ada */}
+      {/* Dari Subuh sampai Maghrib - Hanya countdown timer, tanpa video background */}
       {displayState?.state === "countdown" && (
         <div className="absolute inset-0 z-0">
-          {/* Video Background jika ada countdown video */}
-          {displayState?.countdown_video?.url ? (
-            <video
-              ref={videoRef}
-              key="countdown-video"
-              src={displayState.countdown_video.url}
-              className="w-full h-full object-cover"
-              autoPlay
-              muted={isMuted}
-              playsInline
-              loop
-              data-testid="countdown-video-player"
-            />
-          ) : (
-            /* Background solid purple jika tidak ada video */
-            <div 
-              className="w-full h-full"
-              style={{ backgroundColor: "#5B4B9E" }}
-            />
-          )}
+          {/* Background solid purple - tanpa video */}
+          <div 
+            className="w-full h-full"
+            style={{ backgroundColor: "#5B4B9E" }}
+          />
           
-          {/* Countdown Content - ONLY NUMBERS (overlay on top of video) */}
+          {/* Countdown Content - ONLY NUMBERS */}
           <div className="absolute inset-0 flex items-center justify-center">
             <div className="flex items-center justify-center">
               <span 
@@ -199,21 +184,6 @@ const DisplayPage = () => {
               </span>
             </div>
           </div>
-          
-          {/* Sound Toggle untuk countdown video */}
-          {displayState?.countdown_video?.url && (
-            <button
-              onClick={toggleMute}
-              className="absolute top-8 right-8 p-3 rounded-full bg-black/50 hover:bg-black/70 transition-colors z-10"
-              data-testid="countdown-sound-toggle-btn"
-            >
-              {isMuted ? (
-                <VolumeX className="w-6 h-6 text-white" />
-              ) : (
-                <Volume2 className="w-6 h-6 text-frestea-green" />
-              )}
-            </button>
-          )}
         </div>
       )}
 
