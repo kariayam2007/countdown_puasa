@@ -127,15 +127,17 @@ const AdminPage = () => {
   const fetchData = useCallback(async () => {
     setLoading(true);
     try {
-      const [tvcRes, berbukaRes, scheduleRes, stateRes, usersRes] = await Promise.all([
+      const [tvcRes, berbukaRes, countdownRes, scheduleRes, stateRes, usersRes] = await Promise.all([
         axios.get(`${API}/tvc-videos`),
         axios.get(`${API}/berbuka-videos`),
+        axios.get(`${API}/countdown-videos`),
         axios.get(`${API}/schedules`),
         axios.get(`${API}/display-state`),
         axios.get(`${API}/auth/users`, { headers: getAuthHeader() })
       ]);
       setTvcVideos(tvcRes.data);
       setBerbukaVideos(berbukaRes.data);
+      setCountdownVideos(countdownRes.data);
       setSchedules(scheduleRes.data);
       setDisplayState(stateRes.data);
       setUsers(usersRes.data);
