@@ -645,6 +645,10 @@ const AdminPage = () => {
             <CalendarDays className="w-4 h-4 mr-2" />
             Jadwal Maghrib
           </TabsTrigger>
+          <TabsTrigger value="countdown" className="data-[state=active]:bg-orange-500 data-[state=active]:text-white" data-testid="tab-countdown">
+            <Clock className="w-4 h-4 mr-2" />
+            Video Countdown
+          </TabsTrigger>
           <TabsTrigger value="users" className="data-[state=active]:bg-blue-600" data-testid="tab-users">
             <Users className="w-4 h-4 mr-2" />
             Kelola User
