@@ -1331,7 +1331,7 @@ const AdminPage = () => {
                                 />
                               </div>
                               <div>
-                                <Label className="text-purple-300">Durasi Loop (menit)</Label>
+                                <Label className="text-purple-300">Interval (menit)</Label>
                                 <Input
                                   type="number"
                                   value={editingCountdown?.duration_minutes || 5}
