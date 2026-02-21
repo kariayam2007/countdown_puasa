@@ -1226,7 +1226,7 @@ const AdminPage = () => {
                   />
                 </div>
                 <div>
-                  <Label className="text-purple-300">Durasi Loop (menit)</Label>
+                  <Label className="text-purple-300">Interval (menit)</Label>
                   <Input
                     type="number"
                     placeholder="5"
