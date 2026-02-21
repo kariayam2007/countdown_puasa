@@ -1275,7 +1275,7 @@ const AdminPage = () => {
                   <TableRow className="border-frestea-purple/30">
                     <TableHead className="text-purple-300">Nama</TableHead>
                     <TableHead className="text-purple-300">URL</TableHead>
-                    <TableHead className="text-purple-300">Durasi Loop</TableHead>
+                    <TableHead className="text-purple-300">Interval</TableHead>
                     <TableHead className="text-purple-300">Status</TableHead>
                     <TableHead className="text-right text-purple-300">Aksi</TableHead>
                   </TableRow>
