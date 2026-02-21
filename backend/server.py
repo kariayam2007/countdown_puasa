@@ -430,6 +430,40 @@ async def delete_berbuka_video(video_id: str, username: str = Depends(verify_tok
         raise HTTPException(status_code=404, detail="Video not found")
     return {"message": "Video deleted"}
 
+# ============ COUNTDOWN VIDEO ENDPOINTS (PROTECTED) ============
+
+@api_router.get("/countdown-videos", response_model=List[CountdownVideo])
+async def get_countdown_videos():
+    videos = await db.countdown_videos.find({}, {"_id": 0}).to_list(100)
+    return videos
+
+@api_router.post("/countdown-videos", response_model=CountdownVideo)
+async def create_countdown_video(video: CountdownVideoCreate, username: str = Depends(verify_token)):
+    video_obj = CountdownVideo(**video.model_dump())
+    doc = video_obj.model_dump()
+    await db.countdown_videos.insert_one(doc)
+    return video_obj
+
+@api_router.put("/countdown-videos/{video_id}", response_model=CountdownVideo)
+async def update_countdown_video(video_id: str, video: CountdownVideoUpdate, username: str = Depends(verify_token)):
+    update_data = {k: v for k, v in video.model_dump().items() if v is not None}
+    if not update_data:
+        raise HTTPException(status_code=400, detail="No data to update")
+    
+    result = await db.countdown_videos.update_one({"id": video_id}, {"$set": update_data})
+    if result.matched_count == 0:
+        raise HTTPException(status_code=404, detail="Video not found")
+    
+    updated = await db.countdown_videos.find_one({"id": video_id}, {"_id": 0})
+    return CountdownVideo(**updated)
+
+@api_router.delete("/countdown-videos/{video_id}")
+async def delete_countdown_video(video_id: str, username: str = Depends(verify_token)):
+    result = await db.countdown_videos.delete_one({"id": video_id})
+    if result.deleted_count == 0:
+        raise HTTPException(status_code=404, detail="Video not found")
+    return {"message": "Video deleted"}
+
 # ============ MAGHRIB SCHEDULE ENDPOINTS (PROTECTED) ============
 
 @api_router.get("/schedules", response_model=List[MaghribSchedule])
