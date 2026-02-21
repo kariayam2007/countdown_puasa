@@ -346,6 +346,100 @@ const AdminPage = () => {
     }
   };
 
+  // Countdown Video handlers
+  const handleUploadCountdown = async (e) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    
+    setUploadingCountdown(true);
+    const formData = new FormData();
+    formData.append("file", file);
+    
+    try {
+      const response = await axios.post(`${API}/upload/video`, formData, {
+        headers: { 
+          ...getAuthHeader(),
+          "Content-Type": "multipart/form-data"
+        }
+      });
+      
+      const videoUrl = `${BACKEND_URL}${response.data.url}`;
+      setNewCountdown(prev => ({ ...prev, url: videoUrl, name: file.name.replace(/\.[^/.]+$/, "") }));
+      toast.success("Video berhasil diupload");
+    } catch (error) {
+      if (error.response?.status === 401) {
+        navigate("/login");
+      } else {
+        toast.error(error.response?.data?.detail || "Gagal upload video");
+      }
+    } finally {
+      setUploadingCountdown(false);
+      e.target.value = "";
+    }
+  };
+
+  const handleAddCountdown = async () => {
+    if (!newCountdown.name || !newCountdown.url) {
+      toast.error("Nama dan URL video harus diisi");
+      return;
+    }
+    try {
+      await axios.post(`${API}/countdown-videos`, newCountdown, { headers: getAuthHeader() });
+      toast.success("Video Countdown berhasil ditambahkan");
+      setNewCountdown({ name: "", url: "", duration_minutes: 5 });
+      fetchData();
+    } catch (error) {
+      if (error.response?.status === 401) {
+        navigate("/login");
+      } else {
+        toast.error("Gagal menambahkan video");
+      }
+    }
+  };
+
+  const handleUpdateCountdown = async () => {
+    if (!editingCountdown) return;
+    try {
+      await axios.put(`${API}/countdown-videos/${editingCountdown.id}`, editingCountdown, { headers: getAuthHeader() });
+      toast.success("Video Countdown berhasil diupdate");
+      setEditingCountdown(null);
+      fetchData();
+    } catch (error) {
+      if (error.response?.status === 401) {
+        navigate("/login");
+      } else {
+        toast.error("Gagal mengupdate video");
+      }
+    }
+  };
+
+  const handleDeleteCountdown = async (id) => {
+    try {
+      await axios.delete(`${API}/countdown-videos/${id}`, { headers: getAuthHeader() });
+      toast.success("Video Countdown berhasil dihapus");
+      fetchData();
+    } catch (error) {
+      if (error.response?.status === 401) {
+        navigate("/login");
+      } else {
+        toast.error("Gagal menghapus video");
+      }
+    }
+  };
+
+  const handleToggleCountdown = async (video) => {
+    try {
+      await axios.put(`${API}/countdown-videos/${video.id}`, { is_active: !video.is_active }, { headers: getAuthHeader() });
+      fetchData();
+    } catch (error) {
+      if (error.response?.status === 401) {
+        navigate("/login");
+      } else {
+        toast.error("Gagal mengubah status video");
+      }
+    }
+  };
+
   // Schedule handlers
   const handleAddSchedule = async () => {
     if (!newSchedule.date || !newSchedule.subuh_time || !newSchedule.maghrib_time) {
