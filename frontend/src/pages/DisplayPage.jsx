@@ -11,6 +11,10 @@ const DisplayPage = () => {
   const [currentVideoIndex, setCurrentVideoIndex] = useState(0);
   const [isMuted, setIsMuted] = useState(true);
   const videoRef = useRef(null);
+  
+  // State untuk countdown video interval
+  const [showCountdownVideo, setShowCountdownVideo] = useState(false);
+  const [intervalTimer, setIntervalTimer] = useState(0);
 
   // Fetch display state
   const fetchDisplayState = useCallback(async () => {
@@ -47,9 +51,37 @@ const DisplayPage = () => {
     }
   }, [displayState?.state, countdown, fetchDisplayState]);
 
+  // Interval timer untuk countdown video
+  useEffect(() => {
+    if (displayState?.state === "countdown" && displayState?.countdown_video?.url && !showCountdownVideo) {
+      const durationMinutes = displayState.countdown_video.duration_minutes || 5;
+      const durationSeconds = durationMinutes * 60;
+      
+      const timer = setInterval(() => {
+        setIntervalTimer((prev) => {
+          if (prev >= durationSeconds - 1) {
+            // Waktu interval habis, tampilkan video countdown
+            setShowCountdownVideo(true);
+            return 0;
+          }
+          return prev + 1;
+        });
+      }, 1000);
+      
+      return () => clearInterval(timer);
+    }
+  }, [displayState?.state, displayState?.countdown_video, showCountdownVideo]);
+
+  // Handle countdown video ended
+  const handleCountdownVideoEnded = () => {
+    // Video countdown selesai, kembali ke countdown timer
+    setShowCountdownVideo(false);
+    setIntervalTimer(0);
+  };
+
   // Get video URL based on state
   const getVideoUrl = () => {
-    // Countdown state = NO VIDEO, only countdown display
+    // Countdown state = NO VIDEO (kecuali saat showCountdownVideo true)
     if (displayState?.state === "countdown") {
       return null;
     }
