@@ -56,6 +56,7 @@ const AdminPage = () => {
   const navigate = useNavigate();
   const [tvcVideos, setTvcVideos] = useState([]);
   const [berbukaVideos, setBerbukaVideos] = useState([]);
+  const [countdownVideos, setCountdownVideos] = useState([]);
   const [schedules, setSchedules] = useState([]);
   const [displayState, setDisplayState] = useState(null);
   const [loading, setLoading] = useState(true);
@@ -102,10 +103,12 @@ const AdminPage = () => {
   // Form states
   const [newTvc, setNewTvc] = useState({ name: "", url: "", order: 0 });
   const [newBerbuka, setNewBerbuka] = useState({ name: "", url: "", duration_seconds: 300 });
+  const [newCountdown, setNewCountdown] = useState({ name: "", url: "", duration_minutes: 5 });
   const [newSchedule, setNewSchedule] = useState({ date: "", subuh_time: "04:30", maghrib_time: "", location: "Bekasi" });
   const [selectedDate, setSelectedDate] = useState(null);
   const [editingTvc, setEditingTvc] = useState(null);
   const [editingBerbuka, setEditingBerbuka] = useState(null);
+  const [editingCountdown, setEditingCountdown] = useState(null);
   const [editingSchedule, setEditingSchedule] = useState(null);
   
   // User management states
@@ -119,6 +122,7 @@ const AdminPage = () => {
   // Upload states
   const [uploadingTvc, setUploadingTvc] = useState(false);
   const [uploadingBerbuka, setUploadingBerbuka] = useState(false);
+  const [uploadingCountdown, setUploadingCountdown] = useState(false);
 
   const fetchData = useCallback(async () => {
     setLoading(true);
