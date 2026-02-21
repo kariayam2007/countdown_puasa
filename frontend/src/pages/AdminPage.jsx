@@ -1199,7 +1199,7 @@ const AdminPage = () => {
                 Video Countdown
               </CardTitle>
               <CardDescription className="text-purple-300">
-                Video yang akan diputar selama sesi countdown (dari Subuh sampai Maghrib)
+                Video yang akan diputar secara berkala selama sesi countdown. Countdown timer akan muncul selama "Durasi Interval", kemudian video diputar, lalu kembali ke countdown timer.
               </CardDescription>
             </CardHeader>
             <CardContent className="space-y-6">
