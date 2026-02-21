@@ -216,8 +216,6 @@ const DisplayPage = () => {
           )}
         </div>
       )}
-        </div>
-      )}
 
       {/* ============ STATE: BERBUKA ============ */}
       {/* Setelah Maghrib - HANYA VIDEO BERBUKA, tanpa tulisan apapun */}
