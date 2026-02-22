@@ -190,11 +190,10 @@ const DisplayPage = () => {
               <div className="absolute inset-0 flex items-center justify-center">
                 <div className="flex items-center justify-center">
                   <span 
-                    className="text-8xl md:text-[12rem] lg:text-[20rem] text-transparent inline-block text-center"
+                    className="text-8xl md:text-[12rem] lg:text-[20rem] text-white inline-block text-center"
                     style={{ 
                       fontFamily: "'Agriculture', sans-serif", 
                       fontWeight: 'bold',
-                      WebkitTextStroke: '4px #7FFFD4',
                       width: '1.2em'
                     }} 
                     data-testid="countdown-hours"
@@ -202,20 +201,18 @@ const DisplayPage = () => {
                     {time.hours}
                   </span>
                   <span 
-                    className="text-7xl md:text-[10rem] lg:text-[18rem] text-transparent inline-block text-center"
+                    className="text-7xl md:text-[10rem] lg:text-[18rem] text-white inline-block text-center"
                     style={{ 
                       fontFamily: "'Agriculture', sans-serif", 
                       fontWeight: 'bold',
-                      WebkitTextStroke: '4px #7FFFD4',
                       width: '0.5em'
                     }}
                   >:</span>
                   <span 
-                    className="text-8xl md:text-[12rem] lg:text-[20rem] text-transparent inline-block text-center"
+                    className="text-8xl md:text-[12rem] lg:text-[20rem] text-white inline-block text-center"
                     style={{ 
                       fontFamily: "'Agriculture', sans-serif", 
                       fontWeight: 'bold',
-                      WebkitTextStroke: '4px #7FFFD4',
                       width: '1.2em'
                     }} 
                     data-testid="countdown-minutes"
@@ -223,20 +220,18 @@ const DisplayPage = () => {
                     {time.minutes}
                   </span>
                   <span 
-                    className="text-7xl md:text-[10rem] lg:text-[18rem] text-transparent inline-block text-center"
+                    className="text-7xl md:text-[10rem] lg:text-[18rem] text-white inline-block text-center"
                     style={{ 
                       fontFamily: "'Agriculture', sans-serif", 
                       fontWeight: 'bold',
-                      WebkitTextStroke: '4px #7FFFD4',
                       width: '0.5em'
                     }}
                   >:</span>
                   <span 
-                    className="text-8xl md:text-[12rem] lg:text-[20rem] text-transparent inline-block text-center"
+                    className="text-8xl md:text-[12rem] lg:text-[20rem] text-white inline-block text-center"
                     style={{ 
                       fontFamily: "'Agriculture', sans-serif", 
                       fontWeight: 'bold',
-                      WebkitTextStroke: '4px #7FFFD4',
                       width: '1.2em'
                     }} 
                     data-testid="countdown-seconds"
