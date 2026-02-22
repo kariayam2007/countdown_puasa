@@ -194,7 +194,7 @@ const DisplayPage = () => {
                     style={{ 
                       fontFamily: "'Agriculture', sans-serif", 
                       fontWeight: 'bold',
-                      WebkitTextStroke: '4px white',
+                      WebkitTextStroke: '8px white',
                       width: '1.2em'
                     }} 
                     data-testid="countdown-hours"
@@ -206,7 +206,7 @@ const DisplayPage = () => {
                     style={{ 
                       fontFamily: "'Agriculture', sans-serif", 
                       fontWeight: 'bold',
-                      WebkitTextStroke: '4px white',
+                      WebkitTextStroke: '8px white',
                       width: '0.5em'
                     }}
                   >:</span>
@@ -215,7 +215,7 @@ const DisplayPage = () => {
                     style={{ 
                       fontFamily: "'Agriculture', sans-serif", 
                       fontWeight: 'bold',
-                      WebkitTextStroke: '4px white',
+                      WebkitTextStroke: '8px white',
                       width: '1.2em'
                     }} 
                     data-testid="countdown-minutes"
@@ -227,7 +227,7 @@ const DisplayPage = () => {
                     style={{ 
                       fontFamily: "'Agriculture', sans-serif", 
                       fontWeight: 'bold',
-                      WebkitTextStroke: '4px white',
+                      WebkitTextStroke: '8px white',
                       width: '0.5em'
                     }}
                   >:</span>
@@ -236,7 +236,7 @@ const DisplayPage = () => {
                     style={{ 
                       fontFamily: "'Agriculture', sans-serif", 
                       fontWeight: 'bold',
-                      WebkitTextStroke: '4px white',
+                      WebkitTextStroke: '8px white',
                       width: '1.2em'
                     }} 
                     data-testid="countdown-seconds"
